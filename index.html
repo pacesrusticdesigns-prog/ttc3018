@@ -4,151 +4,107 @@
 <meta charset="UTF-8">
 <title>TTC3018 Studio</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-  body { background: #14171c; color: #e6edf3; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-  header { background: #1f242d; padding: 12px 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
-  header h1 { font-size: 18px; color: #58a6ff; }
-  .status-bar { display: flex; align-items: center; gap: 12px; }
-  .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #da3633; color: #fff; }
-  .badge.connected { background: #238636; }
-  button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-  button:hover { background: #30363d; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.primary { background: #238636; border-color: #2ea043; color: #fff; }
-  button.danger { background: #da3633; border-color: #f85149; color: #fff; }
-  button.accent { background: #1f6feb; border-color: #388bfd; color: #fff; }
-  .workspace { display: grid; grid-template-columns: 340px 1fr 360px; flex: 1; overflow: hidden; }
-  .panel { border-right: 1px solid #30363d; padding: 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-  .panel:last-child { border-right: none; }
-  .panel h2 { font-size: 13px; text-transform: uppercase; color: #8b949e; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
-  .control-group { display: flex; flex-direction: column; gap: 3px; }
-  .row { display: flex; gap: 8px; align-items: center; }
-  .row > * { flex: 1; }
-  label { font-size: 12px; color: #8b949e; }
-  input[type="number"], select, input[type="text"] { background: #0d1117; border: 1px solid #30363d; color: #e6edf3; padding: 6px 8px; border-radius: 4px; font-size: 13px; width: 100%; }
-  .preview-area { background: #0d1117; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
-  canvas { background: #ffffff; border: 2px solid #30363d; max-width: 100%; max-height: 70vh; }
-  .dro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #0d1117; padding: 10px; border-radius: 6px; border: 1px solid #30363d; text-align: center; }
-  .dro-axis { font-size: 11px; color: #8b949e; }
-  .dro-val { font-size: 18px; font-weight: bold; font-family: monospace; color: #58a6ff; margin: 2px 0; }
-  .jog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .jog-btn { padding: 12px 6px; font-size: 13px; font-weight: bold; }
-  .console { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 11px; height: 130px; overflow-y: auto; color: #7ee787; white-space: pre-wrap; }
-  .progress-bar { width: 100%; height: 10px; background: #0d1117; border-radius: 5px; overflow: hidden; border: 1px solid #30363d; }
-  .progress-fill { height: 100%; width: 0%; background: #238636; }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+  body{background:#14171c;color:#e6edf3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  header{background:#1f242d;padding:12px 20px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
+  header h1{font-size:18px;color:#58a6ff}
+  .status-bar{display:flex;align-items:center;gap:12px}
+  .badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:#da3633;color:#fff}
+  .badge.connected{background:#238636}
+  button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
+  button:hover{background:#30363d}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:#238636;border-color:#2ea043;color:#fff}
+  button.danger{background:#da3633;border-color:#f85149;color:#fff}
+  button.accent{background:#1f6feb;border-color:#388bfd;color:#fff}
+  .workspace{display:grid;grid-template-columns:340px 1fr 360px;flex:1;overflow:hidden}
+  .panel{border-right:1px solid #30363d;padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+  .panel:last-child{border-right:none}
+  .panel h2{font-size:13px;text-transform:uppercase;color:#8b949e;border-bottom:1px solid #30363d;padding-bottom:5px}
+  .control-group{display:flex;flex-direction:column;gap:3px}
+  .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+  label{font-size:12px;color:#8b949e}
+  input[type="number"],select,input[type="text"]{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:6px 8px;border-radius:4px;font-size:13px;width:100%}
+  .preview-area{background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+  canvas{background:#fff;border:2px solid #30363d;max-width:100%;max-height:70vh}
+  .dro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#0d1117;padding:10px;border-radius:6px;border:1px solid #30363d;text-align:center}
+  .dro-axis{font-size:11px;color:#8b949e}.dro-val{font-size:18px;font-weight:bold;font-family:monospace;color:#58a6ff;margin:2px 0}
+  .jog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.jog-btn{padding:12px 6px;font-size:13px;font-weight:bold}
+  .console{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;height:130px;overflow-y:auto;color:#7ee787;white-space:pre-wrap}
+  .progress-bar{width:100%;height:10px;background:#0d1117;border-radius:5px;overflow:hidden;border:1px solid #30363d}
+  .progress-fill{height:100%;width:0%;background:#238636}
 </style>
 </head>
 <body>
 <header>
-  <h1>TTC3018 Studio</h1>
+  <h1>TTC3018 Studio v2</h1>
   <div class="status-bar">
-    <select id="baudRate" style="width:110px;">
-      <option value="115200" selected>115200 baud</option>
-      <option value="9600">9600 baud</option>
-    </select>
+    <select id="baudRate" style="width:110px"><option value="115200" selected>115200 baud</option><option value="9600">9600 baud</option></select>
     <span id="connStatus" class="badge">DISCONNECTED</span>
-    <button id="btnConnect" class="accent" onclick="connectUSB()">Connect USB</button>
-    <button id="btnEStop" class="danger" onclick="eStop()">STOP / RESET</button>
+    <button id="btnConnect" class="accent">Connect USB</button>
+    <button id="btnEStop" class="danger">STOP / RESET</button>
   </div>
 </header>
-
 <div class="workspace">
   <div class="panel">
     <h2>1. Load Image or G-Code</h2>
-    <div class="control-group">
-      <label>Select PNG/JPG Image OR .nc/.gcode File:</label>
-      <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp,.nc,.gcode,.gc,.txt" onchange="handleFile(event)">
-    </div>
-    <div class="row">
-      <div class="control-group"><label>Width (mm)</label><input type="number" id="carveWidth" value="100"></div>
-      <div class="control-group"><label>Height (mm)</label><input type="number" id="carveHeight" value="100"></div>
-    </div>
-    <div class="row">
-      <div class="control-group"><label>Cut Depth (mm)</label><input type="number" id="cutDepth" value="0.6" step="0.1"></div>
-      <div class="control-group"><label>Safe Z (mm)</label><input type="number" id="safeZ" value="3.0" step="0.5"></div>
-    </div>
-    <div class="row">
-      <div class="control-group"><label>Feed (mm/min)</label><input type="number" id="feedRate" value="400" step="50"></div>
-      <div class="control-group"><label>Stepover (mm)</label><input type="number" id="stepOver" value="0.25" step="0.05"></div>
-    </div>
-    <div class="row">
-      <div class="control-group"><label>Threshold (0-255)</label><input type="number" id="threshold" value="140"></div>
-      <div class="control-group"><label>Spindle RPM</label><input type="number" id="spindleSpeed" value="10000" step="500"></div>
-    </div>
-    <button class="primary" onclick="generateGcodeFromImage()">Generate Toolpath &amp; G-Code</button>
-    <button id="btnDownloadGcode" onclick="downloadGcode()" disabled>Download .nc File</button>
+    <div class="control-group"><label>Select PNG/JPG Image OR .nc/.gcode File:</label><input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp,.nc,.gcode,.gc,.txt"></div>
+    <div class="row"><div class="control-group"><label>Width (mm)</label><input type="number" id="carveWidth" value="100"></div><div class="control-group"><label>Height (mm)</label><input type="number" id="carveHeight" value="100"></div></div>
+    <div class="row"><div class="control-group"><label>Cut Depth (mm)</label><input type="number" id="cutDepth" value="0.6" step="0.1"></div><div class="control-group"><label>Safe Z (mm)</label><input type="number" id="safeZ" value="3.0" step="0.5"></div></div>
+    <div class="row"><div class="control-group"><label>Feed (mm/min)</label><input type="number" id="feedRate" value="400" step="50"></div><div class="control-group"><label>Stepover (mm)</label><input type="number" id="stepOver" value="0.25" step="0.05"></div></div>
+    <div class="row"><div class="control-group"><label>Threshold (0-255)</label><input type="number" id="threshold" value="140"></div><div class="control-group"><label>Spindle RPM</label><input type="number" id="spindleSpeed" value="10000" step="500"></div></div>
+    <button id="btnGen" class="primary">Generate Toolpath &amp; G-Code</button>
+    <button id="btnDownloadGcode" disabled>Download .nc File</button>
   </div>
-
   <div class="preview-area">
-    <div style="margin-bottom:10px;"><span id="jobStats" style="font-size:13px; color:#8b949e;">Select an image on the left to begin.</span></div>
+    <div style="margin-bottom:10px"><span id="jobStats" style="font-size:13px;color:#8b949e">Select an image on the left to begin.</span></div>
     <canvas id="previewCanvas" width="500" height="500"></canvas>
   </div>
-
   <div class="panel">
     <h2>2. Jog &amp; Zero Machine</h2>
     <div class="dro">
-      <div><div class="dro-axis">X AXIS</div><div class="dro-val" id="posX">0.00</div><button onclick="sendCmd('G92 X0')" style="padding:4px 8px;font-size:11px;">Zero X</button></div>
-      <div><div class="dro-axis">Y AXIS</div><div class="dro-val" id="posY">0.00</div><button onclick="sendCmd('G92 Y0')" style="padding:4px 8px;font-size:11px;">Zero Y</button></div>
-      <div><div class="dro-axis">Z AXIS</div><div class="dro-val" id="posZ">0.00</div><button onclick="sendCmd('G92 Z0')" style="padding:4px 8px;font-size:11px;">Zero Z</button></div>
+      <div><div class="dro-axis">X AXIS</div><div class="dro-val" id="posX">0.00</div><button data-cmd="G92 X0" style="padding:4px 8px;font-size:11px">Zero X</button></div>
+      <div><div class="dro-axis">Y AXIS</div><div class="dro-val" id="posY">0.00</div><button data-cmd="G92 Y0" style="padding:4px 8px;font-size:11px">Zero Y</button></div>
+      <div><div class="dro-axis">Z AXIS</div><div class="dro-val" id="posZ">0.00</div><button data-cmd="G92 Z0" style="padding:4px 8px;font-size:11px">Zero Z</button></div>
     </div>
-    <div class="row">
-      <button onclick="sendCmd('G92 X0 Y0 Z0')" class="accent">Zero ALL (XYZ)</button>
-      <button onclick="sendCmd('G90 G0 X0 Y0')">Go to XY Zero</button>
-    </div>
-    <div class="row">
-      <label style="flex:0 0 65px;">Step:</label>
-      <select id="jogStep">
-        <option value="0.1">0.1 mm</option>
-        <option value="1" selected>1 mm</option>
-        <option value="5">5 mm</option>
-        <option value="10">10 mm</option>
-        <option value="25">25 mm</option>
-      </select>
-      <button onclick="sendCmd('$X')">Unlock ($X)</button>
-    </div>
+    <div class="row"><button data-cmd="G92 X0 Y0 Z0" class="accent">Zero ALL (XYZ)</button><button data-cmd="G90 G0 X0 Y0">Go to XY Zero</button></div>
+    <div class="row"><label style="flex:0 0 65px">Step:</label><select id="jogStep"><option value="0.1">0.1 mm</option><option value="1" selected>1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option><option value="25">25 mm</option></select><button data-cmd="$X">Unlock ($X)</button></div>
     <div class="jog-grid">
-      <div></div><button class="jog-btn" onclick="jog('Y', 1)">Y+</button><div></div><button class="jog-btn" onclick="jog('Z', 1)">Z+</button>
-      <button class="jog-btn" onclick="jog('X', -1)">X-</button><button class="jog-btn" onclick="sendCmd('G90 G0 Z3')">Safe Z</button><button class="jog-btn" onclick="jog('X', 1)">X+</button><button class="jog-btn" onclick="jog('Z', -1)">Z-</button>
-      <div></div><button class="jog-btn" onclick="jog('Y', -1)">Y-</button><div></div><div></div>
+      <div></div><button class="jog-btn" data-jog="Y,1">Y+</button><div></div><button class="jog-btn" data-jog="Z,1">Z+</button>
+      <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" data-cmd="G90 G0 Z3">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
+      <div></div><button class="jog-btn" data-jog="Y,-1">Y-</button><div></div><div></div>
     </div>
-    <div class="row">
-      <button onclick="sendCmd('M3 S10000')">Spindle ON</button>
-      <button onclick="sendCmd('M5')">Spindle OFF</button>
-    </div>
-
+    <div class="row"><button data-cmd="M3 S10000">Spindle ON</button><button data-cmd="M5">Spindle OFF</button></div>
     <h2>3. Run Carve</h2>
-    <div class="row">
-      <button id="btnRunJob" class="primary" onclick="startCarve()" disabled>START CARVE</button>
-      <button id="btnPauseJob" onclick="togglePause()" disabled>Pause</button>
-    </div>
+    <div class="row"><button id="btnRunJob" class="primary" disabled>START CARVE</button><button id="btnPauseJob" disabled>Pause</button></div>
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div id="progressText" style="font-size:12px; color:#8b949e; text-align:center;">Idle — 0%</div>
-    <div class="row">
-      <input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)">
-      <button onclick="sendManual()" style="flex:0 0 60px;">Send</button>
-    </div>
-    <div class="console" id="consoleLog">Ready. Click Connect USB at the top right.</div>
+    <div id="progressText" style="font-size:12px;color:#8b949e;text-align:center">Idle — 0%</div>
+    <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 60px">Send</button></div>
+    <div class="console" id="consoleLog">Ready v2. Click Connect USB at the top right.</div>
   </div>
 </div>
-
 <script>
-let port = null, writer = null, reader = null, isConnected = false;
-let loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false;
-let currentLineIdx = 0, waitingForOk = false, statusTimer = null;
+let port, writer, reader, isConnected = false, loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false, idx = 0, waitOk = false, timer;
 
-function log(msg) {
+function log(m) {
   const c = document.getElementById('consoleLog');
-  c.textContent += msg + '\n';
+  c.textContent += '\n' + m;
   c.scrollTop = c.scrollHeight;
 }
 
 async function connectUSB() {
-  if (isConnected) { disconnectSerial(); return; }
-  log('Opening USB port selector...');
-  if (!('serial' in navigator)) {
-    log('ERROR: WebSerial not available in this window.');
+  if (isConnected) {
+    isRunning = false;
+    clearInterval(timer);
+    try { await reader.cancel(); await writer.close(); await port.close(); } catch (e) {}
+    isConnected = false;
+    document.getElementById('connStatus').textContent = 'DISCONNECTED';
+    document.getElementById('connStatus').classList.remove('connected');
+    document.getElementById('btnConnect').textContent = 'Connect USB';
+    log('Disconnected.');
     return;
   }
+  log('Opening USB port selector...');
   try {
     port = await navigator.serial.requestPort();
     const baud = parseInt(document.getElementById('baudRate').value, 10);
@@ -158,26 +114,46 @@ async function connectUSB() {
     document.getElementById('connStatus').classList.add('connected');
     document.getElementById('btnConnect').textContent = 'Disconnect';
     log('CONNECTED at ' + baud + ' baud!');
-
-    const textEncoder = new TextEncoderStream();
-    textEncoder.readable.pipeTo(port.writable);
-    writer = textEncoder.writable.getWriter();
-
-    readSerialLoop();
+    const enc = new TextEncoderStream();
+    enc.readable.pipeTo(port.writable);
+    writer = enc.writable.getWriter();
+    readLoop();
     setTimeout(() => sendCmd('\r\n'), 400);
-    statusTimer = setInterval(() => {
-      if (isConnected && writer) writer.write('?').catch(() => {});
-    }, 400);
-  } catch (err) {
-    log('Connect failed: ' + err.message);
+    timer = setInterval(() => { if (isConnected && writer) writer.write('?').catch(() => {}); }, 400);
+  } catch (e) {
+    log('Connect failed: ' + e.message);
   }
 }
 
-async function disconnectSerial() {
-  isRunning = false; clearInterval(statusTimer);
+async function readLoop() {
+  const dec = new TextDecoderStream();
+  port.readable.pipeTo(dec.writable);
+  reader = dec.writable.getReader();
+  let buf = '';
   try {
-    if (reader) { await reader.cancel(); reader = null; }
-    if (writer) { await writer.close(); writer = null; }
-    if (port) { await port.close(); port = null; }
-  } catch (e) {}
-  isConnected = false;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let lines = buf.split('\n');
+      buf = lines.pop();
+      for (let l of lines) {
+        l = l.trim();
+        if (!l) continue;
+        if (l.charCodeAt(0) === 60) {
+          const m = l.match(/WPos:([\d.-]+),([\d.-]+),([\d.-]+)/) || l.match(/MPos:([\d.-]+),([\d.-]+),([\d.-]+)/);
+          if (m) {
+            document.getElementById('posX').textContent = parseFloat(m).toFixed(2);
+            document.getElementById('posY').textContent = parseFloat(m).toFixed(2);
+            document.getElementById('posZ').textContent = parseFloat(m).toFixed(2);
+          }
+        } else {
+          if (l !== 'ok') log('RX: ' + l);
+          if (l.startsWith('ok') || l.startsWith('error')) {
+            waitOk = false;
+            if (isRunning && !isPaused) nextLine();
+          }
+        }
+      }
+    }
+  } catch (e) {
