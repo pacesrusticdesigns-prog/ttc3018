@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TTC3018 Studio v3</title>
+<title>TTC3018 Studio v4</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
   body{background:#14171c;color:#e6edf3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -37,7 +37,7 @@
 </head>
 <body>
 <header>
-  <h1>TTC3018 Studio v3</h1>
+  <h1>TTC3018 Studio v4</h1>
   <div class="status-bar">
     <select id="baudRate" style="width:110px"><option value="115200" selected>115200 baud</option><option value="9600">9600 baud</option></select>
     <span id="connStatus" class="badge">DISCONNECTED</span>
@@ -50,9 +50,10 @@
     <h2>1. Load Image or G-Code</h2>
     <div class="control-group"><label>Select PNG/JPG Image OR .nc/.gcode File:</label><input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp,.nc,.gcode,.gc,.txt"></div>
     <div class="row"><div class="control-group"><label>Width (mm)</label><input type="number" id="carveWidth" value="100"></div><div class="control-group"><label>Height (mm)</label><input type="number" id="carveHeight" value="100"></div></div>
-    <div class="row"><div class="control-group"><label>Cut Depth (mm)</label><input type="number" id="cutDepth" value="0.6" step="0.1"></div><div class="control-group"><label>Safe Z (mm)</label><input type="number" id="safeZ" value="3.0" step="0.5"></div></div>
-    <div class="row"><div class="control-group"><label>Feed (mm/min)</label><input type="number" id="feedRate" value="400" step="50"></div><div class="control-group"><label>Stepover (mm)</label><input type="number" id="stepOver" value="0.25" step="0.05"></div></div>
+    <div class="row"><div class="control-group"><label>Cut Depth (mm)</label><input type="number" id="cutDepth" value="0.5" step="0.1"></div><div class="control-group"><label>Safe Z (mm)</label><input type="number" id="safeZ" value="3.5" step="0.5"></div></div>
+    <div class="row"><div class="control-group"><label>Feed (mm/min)</label><input type="number" id="feedRate" value="320" step="50"></div><div class="control-group"><label>Stepover (mm)</label><input type="number" id="stepOver" value="0.15" step="0.05"></div></div>
     <div class="row"><div class="control-group"><label>Threshold (0-255)</label><input type="number" id="threshold" value="140"></div><div class="control-group"><label>Spindle RPM</label><input type="number" id="spindleSpeed" value="10000" step="500"></div></div>
+    <div class="control-group"><label>Zero Origin</label><select id="originMode"><option value="center" selected>Center of Material</option><option value="bottomleft">Front-Left Corner</option></select></div>
     <button id="btnGen" class="primary">Generate Toolpath &amp; G-Code</button>
     <button id="btnDownloadGcode" disabled>Download .nc File</button>
   </div>
@@ -71,7 +72,7 @@
     <div class="row"><label style="flex:0 0 65px">Step:</label><select id="jogStep"><option value="0.1">0.1 mm</option><option value="1" selected>1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option><option value="25">25 mm</option></select><button data-cmd="$X">Unlock ($X)</button></div>
     <div class="jog-grid">
       <div></div><button class="jog-btn" data-jog="Y,1">Y+</button><div></div><button class="jog-btn" data-jog="Z,1">Z+</button>
-      <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" data-cmd="G90 G0 Z3">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
+      <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" data-cmd="G90 G0 Z3.5">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
       <div></div><button class="jog-btn" data-jog="Y,-1">Y-</button><div></div><div></div>
     </div>
     <div class="row"><button data-cmd="M3 S10000">Spindle ON</button><button data-cmd="M5">Spindle OFF</button></div>
@@ -80,7 +81,7 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     <div id="progressText" style="font-size:12px;color:#8b949e;text-align:center">Idle — 0%</div>
     <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 60px">Send</button></div>
-    <div class="console" id="consoleLog">Ready v3. Click Connect USB at the top right.</div>
+    <div class="console" id="consoleLog">Ready v4. Click Connect USB at the top right.</div>
   </div>
 </div>
 <script>
@@ -119,7 +120,7 @@ async function connectUSB() {
     writer = enc.writable.getWriter();
     readLoop();
     setTimeout(function() { sendCmd('\r\n'); }, 400);
-    timer = setInterval(function() { if (isConnected && writer) writer.write('?').catch(function() {}); }, 400);
+    timer = setInterval(function() { if (isConnected && writer && !isRunning) writer.write('?').catch(function() {}); }, 400);
   } catch (e) {
     log('Connect failed: ' + e.message);
   }
@@ -137,10 +138,9 @@ async function readLoop() {
       buf += res.value;
       let lines = buf.split('\n');
       buf = lines.pop();
-      for (let i = 0; i < lines.length; i++) {
-        let l = lines.item ? lines.item(i) : lines.at(i);
-        l = l.trim();
-        if (!l) continue;
+      lines.forEach(function(raw) {
+        let l = raw.trim();
+        if (!l) return;
         if (l.charCodeAt(0) === 60) {
           let part = l.split('WPos:').at(1) || l.split('MPos:').at(1);
           if (part) {
@@ -158,7 +158,7 @@ async function readLoop() {
             if (isRunning && !isPaused) nextLine();
           }
         }
-      }
+      });
     }
   } catch (e) {
     if (isConnected) log('Serial stopped: ' + e.message);
@@ -215,6 +215,9 @@ function generateGcodeFromImage() {
   const S = parseFloat(document.getElementById('stepOver').value);
   const T = parseInt(document.getElementById('threshold').value, 10);
   const RPM = parseInt(document.getElementById('spindleSpeed').value, 10);
+  const isCenter = document.getElementById('originMode').value === 'center';
+  const offX = isCenter ? W / 2 : 0;
+  const offY = isCenter ? H / 2 : 0;
   const cols = Math.max(10, Math.floor(W / S));
   const rows = Math.max(10, Math.floor(H / S));
   const off = document.createElement('canvas');
@@ -231,7 +234,7 @@ function generateGcodeFromImage() {
   const lines = ['G21', 'G90', 'G0 Z' + SZ.toFixed(2), 'M3 S' + RPM, 'G4 P2'];
   const pxW = cv.width / cols, pxH = cv.height / rows;
   for (let r = 0; r < rows; r++) {
-    const iR = rows - 1 - r, yMm = (r * S).toFixed(3), ltr = r % 2 === 0;
+    const iR = rows - 1 - r, yMm = (r * S - offY).toFixed(3), ltr = r % 2 === 0;
     let cut = false;
     for (let i = 0; i <= cols; i++) {
       const c = ltr ? i : cols - 1 - i;
@@ -243,10 +246,10 @@ function generateGcodeFromImage() {
       }
       if (blk && !cut) {
         cut = true;
-        lines.push('G0 X' + ((ltr ? c : c + 1) * S).toFixed(3) + ' Y' + yMm, 'G1 Z' + Z.toFixed(3) + ' F' + Math.max(100, Math.round(F * 0.5)));
+        lines.push('G0 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' Y' + yMm, 'G1 Z' + Z.toFixed(3) + ' F' + Math.max(100, Math.round(F * 0.5)));
       } else if (!blk && cut) {
         cut = false;
-        lines.push('G1 X' + ((ltr ? c : c + 1) * S).toFixed(3) + ' Y' + yMm + ' F' + F, 'G0 Z' + SZ.toFixed(2));
+        lines.push('G1 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' Y' + yMm + ' F' + F, 'G0 Z' + SZ.toFixed(2));
       }
     }
   }
@@ -284,7 +287,3 @@ document.getElementById('btnRunJob').addEventListener('click', function() { if (
 document.getElementById('btnPauseJob').addEventListener('click', async function() { if (!isRunning) return; isPaused = !isPaused; await writer.write(isPaused ? '!' : '~'); document.getElementById('btnPauseJob').textContent = isPaused ? 'Resume' : 'Pause'; log(isPaused ? '--- PAUSED ---' : '--- RESUMED ---'); if (!isPaused && !waitOk) nextLine(); });
 document.getElementById('btnSendManual').addEventListener('click', function() { const el = document.getElementById('manualCmd'); if (el.value.trim()) { sendCmd(el.value.trim()); el.value = ''; } });
 document.querySelectorAll('[data-cmd]').forEach(function(b) { b.addEventListener('click', function() { sendCmd(b.dataset.cmd); }); });
-document.querySelectorAll('[data-jog]').forEach(function(b) { b.addEventListener('click', function() { const parts = b.dataset.jog.split(','); sendCmd('$J=G91 G21 ' + parts.at(0) + (parseFloat(document.getElementById('jogStep').value) * parseFloat(parts.at(1))) + ' F1000'); }); });
-</script>
-</body>
-</html>
