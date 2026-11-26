@@ -184,15 +184,15 @@ async function connectUSB() {
 }
 
 async function readLoop() {
-  const dec = new TextDecoderStream();
-  port.readable.pipeTo(dec.writable);
-  reader = dec.writable.getReader();
+reader = port.readable.getReader();
+const dec = new TextDecoder();
+
   let buf = '';
   try {
     while (true) {
       const res = await reader.read();
       if (res.done) break;
-      buf += res.value;
+      buf += dec.decode(res.value, { stream: true });
       let lines = buf.split('\n');
       buf = lines.pop();
       lines.forEach(function(raw) {
