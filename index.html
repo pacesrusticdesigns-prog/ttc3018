@@ -2,90 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TTC3018 Studio v4</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1f242d">
+<link rel="manifest" href="manifest.json">
+<title>TTC3018 Studio v6</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
   body{background:#14171c;color:#e6edf3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-  header{background:#1f242d;padding:12px 20px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
-  header h1{font-size:18px;color:#58a6ff}
-  .status-bar{display:flex;align-items:center;gap:12px}
+  header{background:#1f242d;padding:10px 18px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  header h1{font-size:17px;color:#58a6ff;white-space:nowrap}
+  .status-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:#da3633;color:#fff}
   .badge.connected{background:#238636}
-  button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px}
+  .badge.warn{background:#d29922;color:#000}
+  button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px}
   button:hover{background:#30363d}
   button:disabled{opacity:.4;cursor:not-allowed}
   button.primary{background:#238636;border-color:#2ea043;color:#fff}
   button.danger{background:#da3633;border-color:#f85149;color:#fff}
   button.accent{background:#1f6feb;border-color:#388bfd;color:#fff}
-  .workspace{display:grid;grid-template-columns:340px 1fr 360px;flex:1;overflow:hidden}
-  .panel{border-right:1px solid #30363d;padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+  button.warn{background:#9e6a03;border-color:#d29922;color:#fff}
+  .workspace{display:grid;grid-template-columns:350px 1fr 365px;flex:1;overflow:hidden}
+  .panel{border-right:1px solid #30363d;padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
   .panel:last-child{border-right:none}
-  .panel h2{font-size:13px;text-transform:uppercase;color:#8b949e;border-bottom:1px solid #30363d;padding-bottom:5px}
-  .control-group{display:flex;flex-direction:column;gap:3px}
-  .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
-  label{font-size:12px;color:#8b949e}
-  input[type="number"],select,input[type="text"]{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:6px 8px;border-radius:4px;font-size:13px;width:100%}
-  .preview-area{background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
-  canvas{background:#fff;border:2px solid #30363d;max-width:100%;max-height:70vh}
-  .dro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#0d1117;padding:10px;border-radius:6px;border:1px solid #30363d;text-align:center}
-  .dro-axis{font-size:11px;color:#8b949e}.dro-val{font-size:18px;font-weight:bold;font-family:monospace;color:#58a6ff;margin:2px 0}
-  .jog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.jog-btn{padding:12px 6px;font-size:13px;font-weight:bold}
-  .console{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;height:130px;overflow-y:auto;color:#7ee787;white-space:pre-wrap}
-  .progress-bar{width:100%;height:10px;background:#0d1117;border-radius:5px;overflow:hidden;border:1px solid #30363d}
-  .progress-fill{height:100%;width:0%;background:#238636}
+  .panel h2{font-size:12px;text-transform:uppercase;color:#8b949e;border-bottom:1px solid #30363d;padding-bottom:4px;margin-top:2px}
+  .control-group{display:flex;flex-direction:column;gap:2px}
+  .row{display:flex;gap:7px;align-items:center}.row>*{flex:1}
+  label{font-size:11px;color:#8b949e}
+  input[type="number"],select,input[type="text"]{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:5px 7px;border-radius:4px;font-size:12px;width:100%}
+  .preview-area{background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px;overflow-y:auto;gap:8px}
+  canvas{background:#fff;border:2px solid #30363d;max-width:100%;max-height:58vh}
+  .dro{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#0d1117;padding:8px;border-radius:6px;border:1px solid #30363d;text-align:center}
+  .dro-axis{font-size:10px;color:#8b949e}.dro-val{font-size:16px;font-weight:bold;font-family:monospace;color:#58a6ff;margin:2px 0}
+  .jog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.jog-btn{padding:10px 4px;font-size:12px;font-weight:bold}
+  .console{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px;font-family:monospace;font-size:11px;height:105px;overflow-y:auto;color:#7ee787;white-space:pre-wrap}
+  .bar-bg{width:100%;height:9px;background:#0d1117;border-radius:5px;overflow:hidden;border:1px solid #30363d}
+  .bar-fill{height:100%;width:0%;background:#238636;transition:width .15s}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modal{background:#1f242d;border:1px solid #30363d;border-radius:10px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+  .modal h3{color:#58a6ff;font-size:16px;border-bottom:1px solid #30363d;padding-bottom:6px}
+  .guide-card{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px;font-size:12px;line-height:1.45}
+  .guide-card strong{color:#79c0ff}
+  .gcode-box{width:100%;height:130px;background:#0d1117;color:#7ee787;border:1px solid #30363d;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;display:none}
+  .alert-box{background:#3d2b00;border:1px solid #d29922;color:#f2cc60;padding:6px 8px;border-radius:5px;font-size:11px;display:none}
 </style>
 </head>
 <body>
 <header>
-  <h1>TTC3018 Studio v4</h1>
+  <h1>TTC3018 Studio v6</h1>
   <div class="status-bar">
-    <select id="baudRate" style="width:110px"><option value="115200" selected>115200 baud</option><option value="9600">9600 baud</option></select>
+    <select id="langSel" style="width:95px"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="pt">Português</option></select>
+    <select id="unitSel" style="width:72px"><option value="mm" selected>mm</option><option value="in">inches</option></select>
+    <button id="btnGuide" class="accent" data-t="guide">Beginner's Guide</button>
+    <select id="baudRate" style="width:105px"><option value="115200" selected>115200 baud</option><option value="9600">9600 baud</option></select>
     <span id="connStatus" class="badge">DISCONNECTED</span>
-    <button id="btnConnect" class="accent">Connect USB</button>
-    <button id="btnEStop" class="danger">STOP / RESET</button>
+    <button id="btnConnect" class="accent" data-t="connect">Connect USB</button>
+    <button id="btnEStop" class="danger" data-t="estop">STOP / RESET</button>
   </div>
 </header>
 <div class="workspace">
   <div class="panel">
-    <h2>1. Load Image or G-Code</h2>
-    <div class="control-group"><label>Select PNG/JPG Image OR .nc/.gcode File:</label><input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp,.nc,.gcode,.gc,.txt"></div>
-    <div class="row"><div class="control-group"><label>Width (mm)</label><input type="number" id="carveWidth" value="100"></div><div class="control-group"><label>Height (mm)</label><input type="number" id="carveHeight" value="100"></div></div>
-    <div class="row"><div class="control-group"><label>Cut Depth (mm)</label><input type="number" id="cutDepth" value="0.5" step="0.1"></div><div class="control-group"><label>Safe Z (mm)</label><input type="number" id="safeZ" value="3.5" step="0.5"></div></div>
-    <div class="row"><div class="control-group"><label>Feed (mm/min)</label><input type="number" id="feedRate" value="320" step="50"></div><div class="control-group"><label>Stepover (mm)</label><input type="number" id="stepOver" value="0.15" step="0.05"></div></div>
+    <h2 data-t="p1">1. Load &amp; Presets</h2>
+    <div class="control-group"><label data-t="loadLbl">Select Image (PNG/JPG) OR G-Code (.nc/.gcode):</label><input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.webp,.nc,.gcode,.gc,.txt"></div>
+    <div class="row">
+      <div class="control-group"><label data-t="bitLbl">Bit / Tool</label><select id="bitPreset"><option value="v60">60° V-Bit (1/8")</option><option value="v90">90° V-Bit (1/8")</option><option value="v30">30° Engraving</option><option value="flat18">1/8" Flat End Mill</option><option value="flat116">1/16" Flat End Mill</option></select></div>
+      <div class="control-group"><label data-t="matLbl">Material</label><select id="matPreset"><option value="soft">Softwood (Cedar/Pine)</option><option value="hard">Hardwood (Oak/Walnut)</option><option value="ply">Plywood / MDF</option><option value="acrylic">Acrylic / Plastic</option></select></div>
+    </div>
+    <div class="row"><div class="control-group"><label data-t="wLbl">Width</label><input type="number" id="carveWidth" value="114.3" step="any"></div><div class="control-group"><label data-t="hLbl">Height</label><input type="number" id="carveHeight" value="139.7" step="any"></div></div>
+    <div class="row"><div class="control-group"><label data-t="dLbl">Cut Depth</label><input type="number" id="cutDepth" value="0.5" step="any"></div><div class="control-group"><label data-t="szLbl">Safe Z</label><input type="number" id="safeZ" value="2.0" step="any"></div></div>
+    <div class="row"><div class="control-group"><label data-t="fLbl">Feed Rate</label><input type="number" id="feedRate" value="600" step="any"></div><div class="control-group"><label data-t="soLbl">Stepover</label><input type="number" id="stepOver" value="0.2" step="any"></div></div>
     <div class="row"><div class="control-group"><label>Threshold (0-255)</label><input type="number" id="threshold" value="140"></div><div class="control-group"><label>Spindle RPM</label><input type="number" id="spindleSpeed" value="10000" step="500"></div></div>
-    <div class="control-group"><label>Zero Origin</label><select id="originMode"><option value="center" selected>Center of Material</option><option value="bottomleft">Front-Left Corner</option></select></div>
-    <button id="btnGen" class="primary">Generate Toolpath &amp; G-Code</button>
-    <button id="btnDownloadGcode" disabled>Download .nc File</button>
+    <div class="row">
+      <div class="control-group"><label data-t="origLbl">Zero Origin</label><select id="originMode"><option value="center" selected>Center of Material</option><option value="fl">Front-Left Corner</option><option value="fr">Front-Right Corner</option><option value="bl">Back-Left Corner</option><option value="br">Back-Right Corner</option></select></div>
+      <div class="control-group"><label data-t="invLbl">Carve Mode</label><select id="invertMode"><option value="0" selected>Recessed (Black)</option><option value="1">Raised (Invert)</option></select></div>
+    </div>
+    <div class="row">
+      <div class="control-group"><label>4th-Axis Rotary (A)</label><select id="rotaryMode"><option value="off" selected>OFF (Flat Board)</option><option value="onA">ON (Wrap to A-Axis)</option><option value="onY">ON (Wrap to Y-Cable)</option></select></div>
+      <div class="control-group"><label id="cylLbl">Cylinder Dia.</label><input type="number" id="cylDia" value="75" step="any"></div>
+    </div>
+    <div id="bedWarn" class="alert-box"></div>
+    <button id="btnGen" class="primary" data-t="genBtn">Generate Toolpath &amp; G-Code</button>
+    <div class="row"><button id="btnSim" data-t="simBtn" disabled>Simulate Dry Run</button><button id="btnDownloadGcode" data-t="dlBtn" disabled>Download .nc</button></div>
   </div>
   <div class="preview-area">
-    <div style="margin-bottom:10px"><span id="jobStats" style="font-size:13px;color:#8b949e">Select an image on the left to begin.</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center">
+      <span id="jobStats" style="font-size:12px;color:#8b949e">Select an image or G-code file on the left.</span>
+      <button id="btnToggleCode" style="padding:4px 9px;font-size:11px" disabled>View / Edit G-Code</button>
+    </div>
     <canvas id="previewCanvas" width="500" height="500"></canvas>
+    <textarea id="gcodeEditor" class="gcode-box"></textarea>
   </div>
   <div class="panel">
-    <h2>2. Jog &amp; Zero Machine</h2>
+    <h2 data-t="p2">2. Jog &amp; Zero Machine</h2>
     <div class="dro">
-      <div><div class="dro-axis">X AXIS</div><div class="dro-val" id="posX">0.00</div><button data-cmd="G92 X0" style="padding:4px 8px;font-size:11px">Zero X</button></div>
-      <div><div class="dro-axis">Y AXIS</div><div class="dro-val" id="posY">0.00</div><button data-cmd="G92 Y0" style="padding:4px 8px;font-size:11px">Zero Y</button></div>
-      <div><div class="dro-axis">Z AXIS</div><div class="dro-val" id="posZ">0.00</div><button data-cmd="G92 Z0" style="padding:4px 8px;font-size:11px">Zero Z</button></div>
+      <div><div class="dro-axis">X</div><div class="dro-val" id="posX">0.00</div><button data-cmd="G92 X0" style="padding:3px 6px;font-size:10px">Zero X</button></div>
+      <div><div class="dro-axis">Y</div><div class="dro-val" id="posY">0.00</div><button data-cmd="G92 Y0" style="padding:3px 6px;font-size:10px">Zero Y</button></div>
+      <div><div class="dro-axis">Z</div><div class="dro-val" id="posZ">0.00</div><button data-cmd="G92 Z0" style="padding:3px 6px;font-size:10px">Zero Z</button></div>
+      <div><div class="dro-axis">A (ROT)</div><div class="dro-val" id="posA">0.00</div><button data-cmd="G92 A0" style="padding:3px 6px;font-size:10px">Zero A</button></div>
     </div>
-    <div class="row"><button data-cmd="G92 X0 Y0 Z0" class="accent">Zero ALL (XYZ)</button><button data-cmd="G90 G0 X0 Y0">Go to XY Zero</button></div>
-    <div class="row"><label style="flex:0 0 65px">Step:</label><select id="jogStep"><option value="0.1">0.1 mm</option><option value="1" selected>1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option><option value="25">25 mm</option></select><button data-cmd="$X">Unlock ($X)</button></div>
+    <div class="row"><button data-cmd="G92 X0 Y0 Z0 A0" class="accent">Zero ALL</button><button id="btnGoZero">Go XY Zero</button><button id="btnProbeZ" class="warn">Probe Z</button></div>
+    <div class="row"><label style="flex:0 0 42px">Step:</label><select id="jogStep"><option value="0.1">0.1</option><option value="1" selected>1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option></select><label style="flex:0 0 58px">Puck mm:</label><input type="number" id="probeThick" value="15.0" step="0.1" style="flex:0 0 58px"><button data-cmd="$X">Unlock</button></div>
     <div class="jog-grid">
-      <div></div><button class="jog-btn" data-jog="Y,1">Y+</button><div></div><button class="jog-btn" data-jog="Z,1">Z+</button>
-      <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" data-cmd="G90 G0 Z3.5">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
+      <button class="jog-btn" data-jog="A,-1">A-</button><button class="jog-btn" data-jog="Y,1">Y+</button><button class="jog-btn" data-jog="A,1">A+</button><button class="jog-btn" data-jog="Z,1">Z+</button>
+      <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" id="btnSafeZ">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
       <div></div><button class="jog-btn" data-jog="Y,-1">Y-</button><div></div><div></div>
     </div>
-    <div class="row"><button data-cmd="M3 S10000">Spindle ON</button><button data-cmd="M5">Spindle OFF</button></div>
-    <h2>3. Run Carve</h2>
-    <div class="row"><button id="btnRunJob" class="primary" disabled>START CARVE</button><button id="btnPauseJob" disabled>Pause</button></div>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div id="progressText" style="font-size:12px;color:#8b949e;text-align:center">Idle — 0%</div>
-    <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 60px">Send</button></div>
-    <div class="console" id="consoleLog">Ready v4. Click Connect USB at the top right.</div>
+    <div class="row"><button id="btnSpindleOn">Spindle ON</button><button data-cmd="M5">Spindle OFF</button><button id="btnTrace" class="warn" disabled>Trace Outline</button></div>
+    <h2 data-t="p3">3. Run &amp; Monitor</h2>
+    <div class="control-group"><div style="display:flex;justify-content:space-between"><label>Spindle Cut Load</label><span id="loadText" style="font-size:11px;color:#7ee787">Idle — 0%</span></div><div class="bar-bg"><div class="bar-fill" id="loadFill"></div></div></div>
+    <div class="row"><button id="btnRunJob" class="primary" disabled>START CARVE</button><button id="btnDryRun" class="accent" disabled>Machine Dry Run</button><button id="btnPauseJob" disabled>Pause</button></div>
+    <div class="row"><label style="flex:0 0 65px">Start Line:</label><input type="number" id="startLine" value="1" min="1"><button id="btnLastLine" style="flex:0 0 105px;font-size:11px">Last Stopped (1)</button></div>
+    <div class="bar-bg"><div class="bar-fill" id="progressFill"></div></div>
+    <div id="progressText" style="font-size:11px;color:#8b949e;text-align:center">Idle — 0% | Est: --</div>
+    <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 55px">Send</button></div>
+    <div class="console" id="consoleLog">Ready v6. Click Connect USB at top right.</div>
   </div>
 </div>
+<div id="safetyModal" class="modal-bg"><div class="modal"><h3>Pre-Carve Safety Checklist</h3><div class="guide-card"><strong>1. Clamps &amp; Obstacles:</strong> Confirm all hold-down clamps are outside the carve boundary.<br><strong>2. Bit &amp; Zero Locked:</strong> Confirm the collet is tight and X/Y/Z zero is set on your workpiece.<br><strong>3. Eye/Ear Gear &amp; Supervision:</strong> Put on safety glasses and never leave a running spindle unattended.</div><div class="row"><button id="btnConfirmCarve" class="primary">Confirm &amp; Start Spindle</button><button id="btnCancelCarve">Cancel</button></div></div></div>
+<div id="guideModal" class="modal-bg"><div class="modal"><h3>Beginner's Guide: Bits, Carves &amp; Safety</h3><div class="guide-card"><strong>60° V-Bit (1/8"):</strong> Best all-around detail bit for crisp lettering, wildlife art, and shading (0.35–0.5mm depth).<br><strong>90° V-Bit (1/8"):</strong> Wider grooves for bold signs, thick borders, and edge chamfers.<br><strong>30° Engraving Bit:</strong> Needle tip for tiny text and delicate inlays (keep shallow 0.2–0.3mm).<br><strong>1/8" &amp; 1/16" Flat End Mills:</strong> Flat cutters for clearing pockets, flattening slabs, and cutting parts out.</div><div class="guide-card"><strong>Carve Types:</strong><br>• <strong>Recessed Raster (Default):</strong> Carves dark lines into wood for natural shadow, paint-fill, or torch-burn.<br>• <strong>Raised Relief (Invert):</strong> Carves the background away so your design stands raised.<br>• <strong>Paint / Epoxy Inlay:</strong> Seal wood first, carve lines, fill with black paint/resin, then sand flat.<br>• <strong>4th-Axis Rotary (A-Axis ON):</strong> Wraps Y travel around round tumblers, dowels, or rolling pins.</div><button id="btnCloseGuide" class="accent">Close Guide</button></div></div>
 <script>
-let port, writer, reader, isConnected = false, loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false, idx = 0, waitOk = false, timer;
+let port, writer, reader, isConnected = false, loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false, isDryRun = false, idx = 0, waitOk = false, timer, wakeLock = null, jobStartTime = 0, startIdx = 0, simTimer = null;
+
+const PRESETS = {
+  v60: { soft: [0.5, 600, 0.2, 10000], hard: [0.35, 400, 0.15, 10000], ply: [0.45, 500, 0.2, 10000], acrylic: [0.3, 450, 0.15, 9000] },
+  v90: { soft: [0.7, 700, 0.25, 10000], hard: [0.45, 450, 0.2, 10000], ply: [0.6, 550, 0.25, 10000], acrylic: [0.4, 500, 0.2, 9000] },
+  v30: { soft: [0.25, 400, 0.1, 10000], hard: [0.2, 300, 0.08, 10000], ply: [0.25, 350, 0.1, 10000], acrylic: [0.2, 300, 0.08, 8500] },
+  flat18: { soft: [1.0, 650, 0.8, 10000], hard: [0.5, 400, 0.6, 10000], ply: [0.8, 550, 0.8, 10000], acrylic: [0.5, 500, 0.6, 9000] },
+  flat116: { soft: [0.5, 450, 0.4, 10000], hard: [0.3, 300, 0.3, 10000], ply: [0.4, 400, 0.4, 10000], acrylic: [0.3, 350, 0.3, 9000] }
+};
+
+const I18N = {
+  en: { guide: "Beginner's Guide", connect: "Connect USB", estop: "STOP / RESET", p1: "1. Load & Presets", loadLbl: "Select Image (PNG/JPG) OR G-Code (.nc/.gcode):", bitLbl: "Bit / Tool", matLbl: "Material", wLbl: "Width", hLbl: "Height", dLbl: "Cut Depth", szLbl: "Safe Z", fLbl: "Feed Rate", soLbl: "Stepover", origLbl: "Zero Origin", invLbl: "Carve Mode", genBtn: "Generate Toolpath & G-Code", simBtn: "Simulate Dry Run", dlBtn: "Download .nc", p2: "2. Jog & Zero Machine", p3: "3. Run & Monitor" },
+  es: { guide: "Guía Principiante", connect: "Conectar USB", estop: "PARO / RESET", p1: "1. Cargar y Ajustes", loadLbl: "Imagen (PNG/JPG) o G-Code (.nc):", bitLbl: "Broca", matLbl: "Material", wLbl: "Ancho", hLbl: "Alto", dLbl: "Profundidad", szLbl: "Z Seguro", fLbl: "Velocidad", soLbl: "Paso", origLbl: "Origen Cero", invLbl: "Modo Tallado", genBtn: "Generar Trayectoria G-Code", simBtn: "Simular en Pantalla", dlBtn: "Descargar .nc", p2: "2. Mover y Cero", p3: "3. Ejecutar y Monitor" },
+  fr: { guide: "Guide Débutant", connect: "Connexion USB", estop: "ARRÊT / RESET", p1: "1. Charger & Préréglages", loadLbl: "Image (PNG/JPG) ou G-Code (.nc):", bitLbl: "Fraise", matLbl: "Matériau", wLbl: "Largeur", hLbl: "Hauteur", dLbl: "Profondeur", szLbl: "Z Sécurité", fLbl: "Avance", soLbl: "Pas", origLbl: "Origine Zéro", invLbl: "Mode Gravure", genBtn: "Générer Parcours G-Code", simBtn: "Simuler à l'Écran", dlBtn: "Télécharger .nc", p2: "2. Déplacer & Zéro", p3: "3. Lancer & Suivi" },
+  de: { guide: "Anfänger-Guide", connect: "USB Verbinden", estop: "STOPP / RESET", p1: "1. Laden & Vorgaben", loadLbl: "Bild (PNG/JPG) oder G-Code (.nc):", bitLbl: "Fräser", matLbl: "Material", wLbl: "Breite", hLbl: "Höhe", dLbl: "Schnitttiefe", szLbl: "Sicherheits-Z", fLbl: "Vorschub", soLbl: "Bahnabstand", origLbl: "Nullpunkt", invLbl: "Fräsmodus", genBtn: "Werkzeugweg & G-Code", simBtn: "Trockenlauf Sim.", dlBtn: ".nc Herunterladen", p2: "2. Verfahren & Nullen", p3: "3. Start & Überwachung" },
+  pt: { guide: "Guia Iniciante", connect: "Conectar USB", estop: "PARAR / RESET", p1: "1. Carregar e Ajustes", loadLbl: "Imagem (PNG/JPG) ou G-Code (.nc):", bitLbl: "Fresa", matLbl: "Material", wLbl: "Largura", hLbl: "Altura", dLbl: "Profundidade", szLbl: "Z Seguro", fLbl: "Avanço", soLbl: "Passo", origLbl: "Origem Zero", invLbl: "Modo Entalhe", genBtn: "Gerar Caminho G-Code", simBtn: "Simular na Tela", dlBtn: "Baixar .nc", p2: "2. Mover e Zerar", p3: "3. Executar e Monitor" }
+};
 
 function log(m) {
   const c = document.getElementById('consoleLog');
@@ -93,19 +145,31 @@ function log(m) {
   c.scrollTop = c.scrollHeight;
 }
 
+function toMm(v) { return document.getElementById('unitSel').value === 'in' ? v * 25.4 : v; }
+function fromMm(v) { return document.getElementById('unitSel').value === 'in' ? +(v / 25.4).toFixed(4) : +v.toFixed(3); }
+
+function updateLoadMeter(cutting) {
+  const d = Math.abs(toMm(parseFloat(document.getElementById('cutDepth').value) || 0.5));
+  const f = toMm(parseFloat(document.getElementById('feedRate').value) || 600);
+  const rpm = parseFloat(document.getElementById('spindleSpeed').value) || 10000;
+  const matMult = { soft: 1, ply: 1.25, acrylic: 1.4, hard: 1.75 }[document.getElementById('matPreset').value] || 1;
+  let pct = cutting ? Math.min(100, Math.round(((d * f * matMult) / (rpm * 0.045)) * 100)) : (isRunning ? 12 : 0);
+  const fill = document.getElementById('loadFill'), txt = document.getElementById('loadText');
+  fill.style.width = pct + '%';
+  fill.style.background = pct > 80 ? '#da3633' : pct > 55 ? '#d29922' : '#238636';
+  txt.style.color = pct > 80 ? '#f85149' : pct > 55 ? '#f2cc60' : '#7ee787';
+  txt.textContent = pct === 0 ? 'Idle — 0%' : (pct > 80 ? 'HEAVY LOAD — ' : pct > 55 ? 'Moderate — ' : 'Optimal — ') + pct + '%';
+}
 async function connectUSB() {
   if (isConnected) {
-    isRunning = false;
-    clearInterval(timer);
+    isRunning = false; clearInterval(timer);
     try { await reader.cancel(); await writer.close(); await port.close(); } catch (e) {}
     isConnected = false;
     document.getElementById('connStatus').textContent = 'DISCONNECTED';
     document.getElementById('connStatus').classList.remove('connected');
     document.getElementById('btnConnect').textContent = 'Connect USB';
-    log('Disconnected.');
-    return;
+    return log('Disconnected.');
   }
-  log('Opening USB port selector...');
   try {
     port = await navigator.serial.requestPort();
     const baud = parseInt(document.getElementById('baudRate').value, 10);
@@ -119,11 +183,9 @@ async function connectUSB() {
     enc.readable.pipeTo(port.writable);
     writer = enc.writable.getWriter();
     readLoop();
-    setTimeout(function() { sendCmd('\r\n'); }, 400);
-    timer = setInterval(function() { if (isConnected && writer && !isRunning) writer.write('?').catch(function() {}); }, 400);
-  } catch (e) {
-    log('Connect failed: ' + e.message);
-  }
+    setTimeout(function() { sendCmd('\r'); }, 350);
+    timer = setInterval(function() { if (isConnected && writer && !isRunning) writer.write('?').catch(function() {}); }, 450);
+  } catch (e) { log('Connect failed: ' + e.message); }
 }
 
 async function readLoop() {
@@ -141,14 +203,15 @@ async function readLoop() {
       lines.forEach(function(raw) {
         let l = raw.trim();
         if (!l) return;
-        if (l.charCodeAt(0) === 60) {
-          let part = l.split('WPos:').at(1) || l.split('MPos:').at(1);
+        if (l.startsWith('<')) {
+          let part = l.split('WPos:')[1] || l.split('MPos:')[1];
           if (part) {
-            let coords = part.split('|').at(0).split(',');
-            if (coords.length >= 3) {
-              document.getElementById('posX').textContent = parseFloat(coords.at(0)).toFixed(2);
-              document.getElementById('posY').textContent = parseFloat(coords.at(1)).toFixed(2);
-              document.getElementById('posZ').textContent = parseFloat(coords.at(2)).toFixed(2);
+            let c = part.split('|')[0].split(',');
+            if (c.length >= 3) {
+              document.getElementById('posX').textContent = fromMm(parseFloat(c[0])).toFixed(2);
+              document.getElementById('posY').textContent = fromMm(parseFloat(c[1])).toFixed(2);
+              document.getElementById('posZ').textContent = fromMm(parseFloat(c[2])).toFixed(2);
+              if (c[3] !== undefined) document.getElementById('posA').textContent = parseFloat(c[3]).toFixed(1);
             }
           }
         } else {
@@ -160,130 +223,216 @@ async function readLoop() {
         }
       });
     }
-  } catch (e) {
-    if (isConnected) log('Serial stopped: ' + e.message);
-  }
+  } catch (e) { if (isConnected) log('Serial stopped: ' + e.message); }
 }
 
 async function sendCmd(c) {
   if (!isConnected || !writer) return log('Click Connect USB first!');
   log('TX: ' + c);
-  await writer.write(c + '\n');
+  await writer.write(c + '\r\n');
 }
 
+function checkBedLimits(W, H, orig) {
+  const warn = document.getElementById('bedWarn');
+  let maxX = orig.endsWith('l') ? W : orig === 'center' ? W / 2 : 0;
+  let minX = orig.endsWith('r') ? -W : orig === 'center' ? -W / 2 : 0;
+  let maxY = orig.startsWith('f') ? H : orig === 'center' ? H / 2 : 0;
+  let minY = orig.startsWith('b') ? -H : orig === 'center' ? -H / 2 : 0;
+  if (W > 300 || H > 180 || (maxX - minX) > 300 || (maxY - minY) > 180) {
+    warn.style.display = 'block';
+    warn.textContent = 'Warning: Size (' + Math.round(W) + 'x' + Math.round(H) + 'mm) exceeds standard 300x180mm TTC3018 bed!';
+  } else { warn.style.display = 'none'; }
+}
+
+function drawPreviewFromGcode(lines) {
+  const cv = document.getElementById('previewCanvas'), ctx = cv.getContext('2d');
+  cv.width = 500; cv.height = 500;
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0, 0, 500, 500);
+  let pts = [], cx = 0, cy = 0, cz = 5, minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  lines.forEach(function(l) {
+    const xm = l.match(/X([-0-9.]+)/), ym = l.match(/Y([-0-9.]+)/), zm = l.match(/Z([-0-9.]+)/);
+    if (xm) cx = parseFloat(xm[1]); if (ym) cy = parseFloat(ym[1]); if (zm) cz = parseFloat(zm[1]);
+    if (xm || ym) {
+      minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy);
+      pts.push({ x: cx, y: cy, cut: cz < 0 });
+    }
+  });
+  if (!pts.length) return;
+  const sc = 440 / Math.max(1, maxX - minX, maxY - minY);
+  ctx.lineWidth = 1.2;
+  for (let i = 1; i < pts.length; i++) {
+    ctx.beginPath();
+    ctx.strokeStyle = pts[i].cut ? '#58a6ff' : 'rgba(210,153,34,0.22)';
+    ctx.moveTo(30 + (pts[i - 1].x - minX) * sc, 470 - (pts[i - 1].y - minY) * sc);
+    ctx.lineTo(30 + (pts[i].x - minX) * sc, 470 - (pts[i].y - minY) * sc);
+    ctx.stroke();
+  }
+}
 function handleFile(e) {
-  const f = e.target.files.item(0);
+  const f = e.target.files[0];
   if (!f) return;
   const n = f.name.toLowerCase();
-  const cv = document.getElementById('previewCanvas');
-  const ctx = cv.getContext('2d');
   if (n.endsWith('.nc') || n.endsWith('.gcode') || n.endsWith('.gc') || n.endsWith('.txt')) {
     const r = new FileReader();
     r.onload = function(ev) {
       gcodeLines = ev.target.result.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l && !l.startsWith(';') && !l.startsWith('('); });
       loadedImage = null;
-      ctx.fillStyle = '#0d1117';
-      ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.fillStyle = '#58a6ff';
-      ctx.font = '18px sans-serif';
-      ctx.fillText('Loaded: ' + f.name + ' (' + gcodeLines.length + ' lines)', 25, 60);
-      document.getElementById('jobStats').textContent = 'G-Code ready: ' + gcodeLines.length + ' lines';
-      document.getElementById('btnRunJob').disabled = false;
-      document.getElementById('btnDownloadGcode').disabled = false;
-      log('Loaded ' + f.name + ' (' + gcodeLines.length + ' lines).');
+      document.getElementById('gcodeEditor').value = gcodeLines.join('\n');
+      drawPreviewFromGcode(gcodeLines);
+      enableJobButtons('G-Code loaded: ' + gcodeLines.length + ' lines');
     };
     r.readAsText(f);
   } else {
     const img = new Image();
     img.onload = function() {
       loadedImage = img;
-      const w = parseFloat(document.getElementById('carveWidth').value) || 100;
-      document.getElementById('carveHeight').value = Math.round(w * (img.height / img.width));
+      const w = parseFloat(document.getElementById('carveWidth').value) || 114.3;
+      document.getElementById('carveHeight').value = +(w * (img.height / img.width)).toFixed(2);
       generateGcodeFromImage();
     };
     img.src = URL.createObjectURL(f);
   }
 }
 
+function enableJobButtons(msg) {
+  document.getElementById('jobStats').textContent = msg;
+  ['btnRunJob', 'btnDryRun', 'btnSim', 'btnTrace', 'btnDownloadGcode', 'btnToggleCode'].forEach(function(id) { document.getElementById(id).disabled = false; });
+}
+
 function generateGcodeFromImage() {
   if (!loadedImage) return log('Select an image file first.');
-  const W = parseFloat(document.getElementById('carveWidth').value);
-  const H = parseFloat(document.getElementById('carveHeight').value);
-  const Z = -Math.abs(parseFloat(document.getElementById('cutDepth').value));
-  const SZ = Math.abs(parseFloat(document.getElementById('safeZ').value));
-  const F = parseInt(document.getElementById('feedRate').value, 10);
-  const S = parseFloat(document.getElementById('stepOver').value);
+  const W = toMm(parseFloat(document.getElementById('carveWidth').value));
+  const H = toMm(parseFloat(document.getElementById('carveHeight').value));
+  const Z = -Math.abs(toMm(parseFloat(document.getElementById('cutDepth').value)));
+  const SZ = Math.abs(toMm(parseFloat(document.getElementById('safeZ').value)));
+  const F = Math.round(toMm(parseFloat(document.getElementById('feedRate').value)));
+  const S = Math.max(0.05, toMm(parseFloat(document.getElementById('stepOver').value)));
   const T = parseInt(document.getElementById('threshold').value, 10);
   const RPM = parseInt(document.getElementById('spindleSpeed').value, 10);
-  const isCenter = document.getElementById('originMode').value === 'center';
-  const offX = isCenter ? W / 2 : 0;
-  const offY = isCenter ? H / 2 : 0;
-  const cols = Math.max(10, Math.floor(W / S));
-  const rows = Math.max(10, Math.floor(H / S));
-  const off = document.createElement('canvas');
-  off.width = cols; off.height = rows;
-  const octx = off.getContext('2d');
-  octx.fillStyle = '#fff'; octx.fillRect(0, 0, cols, rows);
+  const orig = document.getElementById('originMode').value;
+  const inv = document.getElementById('invertMode').value === '1';
+  const rot = document.getElementById('rotaryMode').value;
+  const dia = Math.max(1, toMm(parseFloat(document.getElementById('cylDia').value) || 75));
+  checkBedLimits(W, H, orig);
+  const offX = orig === 'center' ? W / 2 : orig.endsWith('r') ? W : 0;
+  const offY = orig === 'center' ? H / 2 : orig.startsWith('b') ? H : 0;
+  const cols = Math.max(10, Math.floor(W / S)), rows = Math.max(10, Math.floor(H / S));
+  const off = document.createElement('canvas'); off.width = cols; off.height = rows;
+  const octx = off.getContext('2d'); octx.fillStyle = '#fff'; octx.fillRect(0, 0, cols, rows);
   octx.drawImage(loadedImage, 0, 0, cols, rows);
   const d = octx.getImageData(0, 0, cols, rows).data;
-  const cv = document.getElementById('previewCanvas');
-  const ctx = cv.getContext('2d');
+  const cv = document.getElementById('previewCanvas'), ctx = cv.getContext('2d');
   cv.width = 500; cv.height = Math.round(500 * (H / W));
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
-  ctx.fillStyle = '#111';
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.fillStyle = '#111';
   const lines = ['G21', 'G90', 'G0 Z' + SZ.toFixed(2), 'M3 S' + RPM, 'G4 P2'];
   const pxW = cv.width / cols, pxH = cv.height / rows;
   for (let r = 0; r < rows; r++) {
-    const iR = rows - 1 - r, yMm = (r * S - offY).toFixed(3), ltr = r % 2 === 0;
+    const iR = rows - 1 - r, yRaw = r * S - offY, ltr = r % 2 === 0;
+    const yCoord = rot === 'off' ? 'Y' + yRaw.toFixed(3) : (rot === 'onA' ? 'A' : 'Y') + ((yRaw / (Math.PI * dia)) * 360).toFixed(3);
     let cut = false;
     for (let i = 0; i <= cols; i++) {
       const c = ltr ? i : cols - 1 - i;
       let blk = false;
       if (i < cols) {
         const k = (iR * cols + c) * 4;
-        blk = (0.299 * d.at(k) + 0.587 * d.at(k + 1) + 0.114 * d.at(k + 2)) < T;
+        const lum = 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2];
+        blk = inv ? lum >= T : lum < T;
         if (blk) ctx.fillRect(c * pxW, iR * pxH, Math.ceil(pxW), Math.ceil(pxH));
       }
       if (blk && !cut) {
         cut = true;
-        lines.push('G0 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' Y' + yMm, 'G1 Z' + Z.toFixed(3) + ' F' + Math.max(100, Math.round(F * 0.5)));
+        lines.push('G0 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' ' + yCoord, 'G1 Z' + Z.toFixed(3) + ' F' + Math.max(100, Math.round(F * 0.5)));
       } else if (!blk && cut) {
         cut = false;
-        lines.push('G1 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' Y' + yMm + ' F' + F, 'G0 Z' + SZ.toFixed(2));
+        lines.push('G1 X' + ((ltr ? c : c + 1) * S - offX).toFixed(3) + ' ' + yCoord + ' F' + F, 'G0 Z' + SZ.toFixed(2));
       }
     }
   }
-  lines.push('G0 Z' + SZ.toFixed(2), 'M5', 'G0 X0 Y0');
+  lines.push('G0 Z' + SZ.toFixed(2), 'M5', 'G0 X0 ' + (rot === 'onA' ? 'A0' : 'Y0'));
   gcodeLines = lines;
-  document.getElementById('jobStats').textContent = 'Ready: ' + W + 'x' + H + 'mm | ' + gcodeLines.length + ' lines';
-  document.getElementById('btnRunJob').disabled = false;
-  document.getElementById('btnDownloadGcode').disabled = false;
-  log('Generated ' + gcodeLines.length + ' lines.');
+  document.getElementById('gcodeEditor').value = lines.join('\n');
+  const estMin = Math.max(1, Math.round((lines.length * 0.045) / 60));
+  enableJobButtons('Ready: ' + Math.round(W) + 'x' + Math.round(H) + 'mm | ' + lines.length + ' lines (~' + estMin + ' min)');
+  log('Generated ' + lines.length + ' lines (~' + estMin + ' min).');
 }
-
 async function nextLine() {
   if (!isRunning || isPaused || waitOk) return;
   if (idx >= gcodeLines.length) {
-    isRunning = false;
+    isRunning = false; isDryRun = false; updateLoadMeter(false);
     document.getElementById('btnPauseJob').disabled = true;
     document.getElementById('progressFill').style.width = '100%';
     document.getElementById('progressText').textContent = 'DONE — 100%';
-    return log('--- CARVE COMPLETE ---');
+    if (wakeLock) { wakeLock.release().catch(function() {}); wakeLock = null; }
+    return log('--- JOB COMPLETE ---');
   }
-  const l = gcodeLines.at(idx++);
+  let l = gcodeLines[idx++];
+  localStorage.setItem('ttc_last_line', idx);
+  document.getElementById('btnLastLine').textContent = 'Last Stopped (' + idx + ')';
+  const szSafe = (Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))) + 10).toFixed(2);
+  if (isDryRun) {
+    if (l.startsWith('M3')) l = 'M5';
+    l = l.replace(/Z[-0-9.]+/g, 'Z' + szSafe);
+  }
+  updateLoadMeter(!isDryRun && /Z-/.test(l) || (!isDryRun && l.startsWith('G1') && !l.includes('Z')));
   waitOk = true;
-  const p = Math.round((idx / gcodeLines.length) * 100);
+  const done = idx - startIdx, tot = Math.max(1, gcodeLines.length - startIdx);
+  const p = Math.min(100, Math.round((done / tot) * 100));
+  const elSec = (Date.now() - jobStartTime) / 1000;
+  const remMin = done > 5 ? Math.max(0, Math.round(((elSec / done) * (tot - done)) / 60)) : '--';
   document.getElementById('progressFill').style.width = p + '%';
-  document.getElementById('progressText').textContent = 'Carving: ' + p + '% (' + idx + '/' + gcodeLines.length + ')';
-  await writer.write(l + '\n');
+  document.getElementById('progressText').textContent = (isDryRun ? 'DRY RUN: ' : 'Carving: ') + p + '% (' + idx + '/' + gcodeLines.length + ') | ~' + remMin + 'm left';
+  await writer.write(l + '\r\n');
+}
+
+function beginJob(dry) {
+  if (!isConnected) return log('Click Connect USB first!');
+  if (!gcodeLines.length) return log('Load an image or G-code first!');
+  if (isRunning) return;
+  isDryRun = dry; isPaused = false; waitOk = false;
+  const sLine = Math.max(1, Math.min(gcodeLines.length, parseInt(document.getElementById('startLine').value, 10) || 1));
+  startIdx = sLine - 1; idx = startIdx; jobStartTime = Date.now();
+  const sz = Math.abs(toMm(parseFloat(document.getElementById('safeZ').value)));
+  const rpm = parseInt(document.getElementById('spindleSpeed').value, 10);
+  const prep = dry ? ['G21', 'G90', 'M5', 'G0 Z' + (sz + 10).toFixed(2)] : (sLine > 1 ? ['G21', 'G90', 'G0 Z' + sz.toFixed(2), 'M3 S' + rpm, 'G4 P2'] : []);
+  if (prep.length) { gcodeLines = prep.concat(gcodeLines.slice(startIdx)); startIdx = 0; idx = 0; }
+  isRunning = true;
+  document.getElementById('btnPauseJob').disabled = false;
+  document.getElementById('btnPauseJob').textContent = 'Pause';
+  if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function(w) { wakeLock = w; }).catch(function() {});
+  log(dry ? '--- PHYSICAL DRY RUN (SPINDLE OFF, Z+' + (sz + 10).toFixed(1) + 'mm) ---' : '--- STARTING CARVE (Line ' + sLine + ') ---');
+  nextLine();
 }
 
 document.getElementById('btnConnect').addEventListener('click', connectUSB);
-document.getElementById('btnEStop').addEventListener('click', async function() { isRunning = false; isPaused = false; waitOk = false; if (isConnected && writer) { await writer.write('\x18'); log('!!! STOP SENT !!!'); } });
+document.getElementById('btnEStop').addEventListener('click', async function() { isRunning = false; isPaused = false; waitOk = false; updateLoadMeter(false); if (isConnected && writer) { await writer.write('\x18'); log('!!! STOP / RESET SENT !!!'); } });
 document.getElementById('fileInput').addEventListener('change', handleFile);
 document.getElementById('btnGen').addEventListener('click', generateGcodeFromImage);
 document.getElementById('btnDownloadGcode').addEventListener('click', function() { if (!gcodeLines.length) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gcodeLines.join('\n')], { type: 'text/plain' })); a.download = 'ttc3018_carve.nc'; a.click(); });
-document.getElementById('btnRunJob').addEventListener('click', function() { if (!isConnected) return log('Click Connect USB first!'); if (!gcodeLines.length) return log('Load an image first!'); if (isRunning) return; isRunning = true; isPaused = false; idx = 0; waitOk = false; document.getElementById('btnPauseJob').disabled = false; document.getElementById('btnPauseJob').textContent = 'Pause'; log('--- STARTING CARVE ---'); nextLine(); });
-document.getElementById('btnPauseJob').addEventListener('click', async function() { if (!isRunning) return; isPaused = !isPaused; await writer.write(isPaused ? '!' : '~'); document.getElementById('btnPauseJob').textContent = isPaused ? 'Resume' : 'Pause'; log(isPaused ? '--- PAUSED ---' : '--- RESUMED ---'); if (!isPaused && !waitOk) nextLine(); });
+document.getElementById('btnRunJob').addEventListener('click', function() { document.getElementById('safetyModal').style.display = 'flex'; });
+document.getElementById('btnCancelCarve').addEventListener('click', function() { document.getElementById('safetyModal').style.display = 'none'; });
+document.getElementById('btnConfirmCarve').addEventListener('click', function() { document.getElementById('safetyModal').style.display = 'none'; beginJob(false); });
+document.getElementById('btnDryRun').addEventListener('click', function() { const sz = (Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))) + 10).toFixed(1); if (confirm('Physical Dry Run: Bit will auto-lift to Z+' + sz + 'mm with Spindle OFF. Confirm clamps are lower than ' + sz + 'mm and rails are clear?')) beginJob(true); });
+document.getElementById('btnPauseJob').addEventListener('click', async function() { if (!isRunning) return; isPaused = !isPaused; await writer.write(isPaused ? '!' : '~'); document.getElementById('btnPauseJob').textContent = isPaused ? 'Resume' : 'Pause'; log(isPaused ? '--- PAUSED ---' : '--- RESUMED ---'); if (!isPaused) { waitOk = false; setTimeout(nextLine, 150); } });
+document.getElementById('btnLastLine').addEventListener('click', function() { document.getElementById('startLine').value = localStorage.getItem('ttc_last_line') || 1; });
+document.getElementById('btnGuide').addEventListener('click', function() { document.getElementById('guideModal').style.display = 'flex'; });
+document.getElementById('btnCloseGuide').addEventListener('click', function() { document.getElementById('guideModal').style.display = 'none'; });
+document.getElementById('btnToggleCode').addEventListener('click', function() { const ed = document.getElementById('gcodeEditor'); ed.style.display = ed.style.display === 'block' ? 'none' : 'block'; if (ed.style.display === 'none' && ed.value.trim()) gcodeLines = ed.value.split('\n').map(function(l) { return l.trim(); }).filter(Boolean); });
 document.getElementById('btnSendManual').addEventListener('click', function() { const el = document.getElementById('manualCmd'); if (el.value.trim()) { sendCmd(el.value.trim()); el.value = ''; } });
+document.getElementById('btnGoZero').addEventListener('click', function() { const sz = Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))).toFixed(2); sendCmd('G90 G0 Z' + sz); setTimeout(function() { sendCmd('G90 G0 X0 Y0'); }, 200); });
+document.getElementById('btnSafeZ').addEventListener('click', function() { sendCmd('G90 G0 Z' + Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))).toFixed(2)); });
+document.getElementById('btnSpindleOn').addEventListener('click', function() { sendCmd('M3 S' + (parseInt(document.getElementById('spindleSpeed').value, 10) || 10000)); });
+document.getElementById('btnProbeZ').addEventListener('click', function() { const t = parseFloat(document.getElementById('probeThick').value) || 15; sendCmd('G91 G38.2 Z-25 F80'); setTimeout(function() { sendCmd('G92 Z' + t.toFixed(2)); sendCmd('G90 G0 Z' + (t + 5).toFixed(2)); }, 3000); });
+document.getElementById('btnTrace').addEventListener('click', function() { const W = toMm(parseFloat(document.getElementById('carveWidth').value)), H = toMm(parseFloat(document.getElementById('carveHeight').value)), orig = document.getElementById('originMode').value, sz = (Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))) + 5).toFixed(2); const x0 = orig === 'center' ? -W / 2 : orig.endsWith('r') ? -W : 0, y0 = orig === 'center' ? -H / 2 : orig.startsWith('b') ? -H : 0; ['G90', 'G0 Z' + sz, 'G0 X' + x0.toFixed(2) + ' Y' + y0.toFixed(2), 'G1 X' + (x0 + W).toFixed(2) + ' F1200', 'G1 Y' + (y0 + H).toFixed(2), 'G1 X' + x0.toFixed(2), 'G1 Y' + y0.toFixed(2), 'G0 X0 Y0'].forEach(function(c, i) { setTimeout(function() { sendCmd(c); }, i * 450); }); });
+document.getElementById('btnSim').addEventListener('click', function() { if (simTimer) { clearInterval(simTimer); simTimer = null; return log('Simulation stopped.'); } drawPreviewFromGcode(gcodeLines); const cv = document.getElementById('previewCanvas'), ctx = cv.getContext('2d'); let pts = [], cx = 0, cy = 0, minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9; gcodeLines.forEach(function(l) { const xm = l.match(/X([-0-9.]+)/), ym = l.match(/Y([-0-9.]+)/); if (xm) cx = parseFloat(xm); if (ym) cy = parseFloat(ym); if (xm || ym) { minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy); pts.push({ x: cx, y: cy }); } }); if (pts.length < 2) return; const sc = 440 / Math.max(1, maxX - minX, maxY - minY); let si = 1; simTimer = setInterval(function() { for (let k = 0; k < 25 && si < pts.length; k++, si++) { ctx.beginPath(); ctx.strokeStyle = '#3fb950'; ctx.lineWidth = 1.6; ctx.moveTo(30 + (pts[si - 1].x - minX) * sc, 470 - (pts[si - 1].y - minY) * sc); ctx.lineTo(30 + (pts[si].x - minX) * sc, 470 - (pts[si].y - minY) * sc); ctx.stroke(); } if (si >= pts.length) { clearInterval(simTimer); simTimer = null; log('Simulation complete!'); } }, 30); });
+function applyPresets() { const p = PRESETS[document.getElementById('bitPreset').value][document.getElementById('matPreset').value]; document.getElementById('cutDepth').value = fromMm(p); document.getElementById('feedRate').value = fromMm(p); document.getElementById('stepOver').value = fromMm(p); document.getElementById('spindleSpeed').value = p; updateLoadMeter(false); }
+document.getElementById('bitPreset').addEventListener('change', applyPresets);
+document.getElementById('matPreset').addEventListener('change', applyPresets);
+document.getElementById('unitSel').addEventListener('change', function() { const toIn = this.value === 'in'; ['carveWidth', 'carveHeight', 'cutDepth', 'safeZ', 'feedRate', 'stepOver', 'cylDia'].forEach(function(id) { const el = document.getElementById(id), v = parseFloat(el.value); if (!isNaN(v)) el.value = toIn ? +(v / 25.4).toFixed(4) : +(v * 25.4).toFixed(2); }); });
+document.getElementById('langSel').addEventListener('change', function() { const dict = I18N[this.value] || I18N.en; localStorage.setItem('ttc_lang', this.value); document.querySelectorAll('[data-t]').forEach(function(el) { if (dict[el.dataset.t]) el.textContent = dict[el.dataset.t]; }); });
 document.querySelectorAll('[data-cmd]').forEach(function(b) { b.addEventListener('click', function() { sendCmd(b.dataset.cmd); }); });
+document.querySelectorAll('[data-jog]').forEach(function(b) { b.addEventListener('click', function() { const p = b.dataset.jog.split(','), step = parseFloat(document.getElementById('jogStep').value) * parseFloat(p), unit = document.getElementById('unitSel').value === 'in' ? 'G20' : 'G21'; sendCmd('$J=G91 ' + unit + ' ' + p + step + ' F1000'); }); });
+const savedLast = localStorage.getItem('ttc_last_line'); if (savedLast) document.getElementById('btnLastLine').textContent = 'Last Stopped (' + savedLast + ')';
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function() {});
+</script>
+</body>
+</html>
