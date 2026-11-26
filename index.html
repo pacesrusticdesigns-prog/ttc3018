@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1f242d">
 <link rel="manifest" href="manifest.json">
-<title>TTC3018 Studio v6.1</title>
+<title>TTC3018 Studio v6.2</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
   body{background:#14171c;color:#e6edf3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -21,12 +21,12 @@
   button.danger{background:#da3633;border-color:#f85149;color:#fff}
   button.accent{background:#1f6feb;border-color:#388bfd;color:#fff}
   button.warn{background:#9e6a03;border-color:#d29922;color:#fff}
-  .workspace{display:grid;grid-template-columns:350px 1fr 365px;flex:1;overflow:hidden}
+  .workspace{display:grid;grid-template-columns:350px 1fr 375px;flex:1;overflow:hidden}
   .panel{border-right:1px solid #30363d;padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
   .panel:last-child{border-right:none}
   .panel h2{font-size:12px;text-transform:uppercase;color:#8b949e;border-bottom:1px solid #30363d;padding-bottom:4px;margin-top:2px}
   .control-group{display:flex;flex-direction:column;gap:2px}
-  .row{display:flex;gap:7px;align-items:center}.row>*{flex:1}
+  .row{display:flex;gap:6px;align-items:center}.row>*{flex:1}
   label{font-size:11px;color:#8b949e}
   input[type="number"],select,input[type="text"]{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:5px 7px;border-radius:4px;font-size:12px;width:100%}
   .preview-area{background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px;overflow-y:auto;gap:8px}
@@ -48,7 +48,7 @@
 </head>
 <body>
 <header>
-  <h1>TTC3018 Studio v6.1</h1>
+  <h1>TTC3018 Studio v6.2</h1>
   <div class="status-bar">
     <select id="langSel" style="width:95px"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="pt">Português</option></select>
     <select id="unitSel" style="width:72px"><option value="mm" selected>mm</option><option value="in">inches</option></select>
@@ -100,8 +100,8 @@
       <div><div class="dro-axis">A (ROT)</div><div class="dro-val" id="posA">0.00</div><button data-cmd="G92 A0" style="padding:3px 6px;font-size:10px">Zero A</button></div>
     </div>
     <div class="row"><button data-cmd="G92 X0 Y0 Z0 A0" class="accent">Zero ALL</button><button id="btnGoZero">Go XY Zero</button><button id="btnProbeZ" class="warn">Probe Z</button></div>
-    <div class="row"><label style="flex:0 0 42px">Step:</label><select id="jogStep"><option value="0.1">0.1</option><option value="1" selected>1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option></select><label style="flex:0 0 58px">Puck mm:</label><input type="number" id="probeThick" value="15.0" step="0.1" style="flex:0 0 58px"><button data-cmd="$X">Unlock</button></div>
-    <div class="row"><button id="btnKeyJog">Keyboard Jog: OFF</button><span style="font-size:10px;color:#8b949e;flex:2">Arrows = X/Y | PgUp/PgDn = Z</span></div>
+    <div class="row"><label style="flex:0 0 46px">XY Step:</label><select id="jogStep" style="flex:1"><option value="0.1">0.1</option><option value="1" selected>1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option></select><input type="number" id="customXY" value="1" step="any" style="flex:0 0 56px"><label style="flex:0 0 40px">Z Step:</label><select id="jogStepZ" style="flex:1"><option value="0.05">0.05</option><option value="0.1" selected>0.1</option><option value="0.5">0.5</option><option value="1">1</option><option value="5">5</option></select><input type="number" id="customZ" value="0.1" step="any" style="flex:0 0 56px"></div>
+    <div class="row"><label style="flex:0 0 58px">Puck mm:</label><input type="number" id="probeThick" value="15.0" step="0.1" style="flex:0 0 58px"><button data-cmd="$X">Unlock</button><button id="btnKeyJog">Keyboard Jog: OFF</button></div>
     <div class="jog-grid">
       <button class="jog-btn" data-jog="A,-1">A-</button><button class="jog-btn" data-jog="Y,1">Y+</button><button class="jog-btn" data-jog="A,1">A+</button><button class="jog-btn" data-jog="Z,1">Z+</button>
       <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" id="btnSafeZ">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
@@ -115,7 +115,7 @@
     <div class="bar-bg"><div class="bar-fill" id="progressFill"></div></div>
     <div id="progressText" style="font-size:11px;color:#8b949e;text-align:center">Idle — 0% | Est: --</div>
     <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 55px">Send</button></div>
-    <div class="console" id="consoleLog">Ready v6.1. Click Connect USB at top right.</div>
+    <div class="console" id="consoleLog">Ready v6.2. Click Connect USB at top right.</div>
   </div>
 </div>
 <div id="safetyModal" class="modal-bg"><div class="modal"><h3>Pre-Carve Safety Checklist</h3><div class="guide-card"><strong>1. Clamps &amp; Obstacles:</strong> Confirm all hold-down clamps are outside the carve boundary.<br><strong>2. Bit &amp; Zero Locked:</strong> Confirm the collet is tight and X/Y/Z zero is set on your workpiece.<br><strong>3. Eye/Ear Gear &amp; Supervision:</strong> Put on safety glasses and never leave a running spindle unattended.</div><div class="row"><button id="btnConfirmCarve" class="primary">Confirm &amp; Start Spindle</button><button id="btnCancelCarve">Cancel</button></div></div></div>
@@ -417,10 +417,15 @@ document.getElementById('btnSim').addEventListener('click', function() { if (sim
 function applyPresets() { const p = PRESETS[document.getElementById('bitPreset').value][document.getElementById('matPreset').value]; document.getElementById('cutDepth').value = fromMm(p.at(0)); document.getElementById('feedRate').value = fromMm(p.at(1)); document.getElementById('stepOver').value = fromMm(p.at(2)); document.getElementById('spindleSpeed').value = p.at(3); updateLoadMeter(false); }
 document.getElementById('bitPreset').addEventListener('change', applyPresets);
 document.getElementById('matPreset').addEventListener('change', applyPresets);
-document.getElementById('unitSel').addEventListener('change', function() { const toIn = this.value === 'in'; ['carveWidth', 'carveHeight', 'cutDepth', 'safeZ', 'feedRate', 'stepOver', 'cylDia'].forEach(function(id) { const el = document.getElementById(id), v = parseFloat(el.value); if (!isNaN(v)) el.value = toIn ? +(v / 25.4).toFixed(4) : +(v * 25.4).toFixed(2); }); });
+const XY_STEPS = { mm: [0.1, 1, 5, 10, 25], in: [0.005, 0.01, 0.05, 0.1, 0.5, 1] };
+const Z_STEPS = { mm: [0.05, 0.1, 0.5, 1, 5], in: [0.002, 0.005, 0.01, 0.05, 0.1] };
+function fillStepMenu(selId, inpId, arr, defVal) { const s = document.getElementById(selId); s.innerHTML = arr.map(function(v) { return '<option value="' + v + '"' + (v === defVal ? ' selected' : '') + '>' + v + '</option>'; }).join(''); document.getElementById(inpId).value = defVal; }
+document.getElementById('jogStep').addEventListener('change', function() { document.getElementById('customXY').value = this.value; });
+document.getElementById('jogStepZ').addEventListener('change', function() { document.getElementById('customZ').value = this.value; });
+document.getElementById('unitSel').addEventListener('change', function() { const toIn = this.value === 'in'; ['carveWidth', 'carveHeight', 'cutDepth', 'safeZ', 'feedRate', 'stepOver', 'cylDia'].forEach(function(id) { const el = document.getElementById(id), v = parseFloat(el.value); if (!isNaN(v)) el.value = toIn ? +(v / 25.4).toFixed(4) : +(v * 25.4).toFixed(2); }); fillStepMenu('jogStep', 'customXY', XY_STEPS[this.value], toIn ? 0.05 : 1); fillStepMenu('jogStepZ', 'customZ', Z_STEPS[this.value], toIn ? 0.005 : 0.1); });
 document.getElementById('langSel').addEventListener('change', function() { const dict = I18N[this.value] || I18N.en; localStorage.setItem('ttc_lang', this.value); document.querySelectorAll('[data-t]').forEach(function(el) { if (dict[el.dataset.t]) el.textContent = dict[el.dataset.t]; }); });
 document.querySelectorAll('[data-cmd]').forEach(function(b) { b.addEventListener('click', function() { sendCmd(b.dataset.cmd); }); });
-function doJog(axis, dir) { const step = parseFloat(document.getElementById('jogStep').value) * dir, unit = document.getElementById('unitSel').value === 'in' ? 'G20' : 'G21'; sendCmd('$J=G91 ' + unit + ' ' + axis + step + ' F1000'); }
+function doJog(axis, dir) { const raw = axis === 'Z' ? parseFloat(document.getElementById('customZ').value) : parseFloat(document.getElementById('customXY').value); const step = +(Math.abs(raw || 0.1) * dir).toFixed(4), unit = document.getElementById('unitSel').value === 'in' ? 'G20' : 'G21'; sendCmd('$J=G91 ' + unit + ' ' + axis + step + ' F1000'); }
 document.querySelectorAll('[data-jog]').forEach(function(b) { b.addEventListener('click', function() { const p = b.dataset.jog.split(','); doJog(p.at(0), parseFloat(p.at(1))); }); });
 document.getElementById('btnKeyJog').addEventListener('click', function() { keyJogOn = !keyJogOn; this.textContent = keyJogOn ? 'Keyboard Jog: ON' : 'Keyboard Jog: OFF'; this.classList.toggle('primary', keyJogOn); });
 document.addEventListener('keydown', function(e) { if (!keyJogOn || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return; const map = { ArrowLeft: ['X', -1], ArrowRight: ['X', 1], ArrowUp: ['Y', 1], ArrowDown: ['Y', -1], PageUp: ['Z', 1], PageDown: ['Z', -1] }; if (map[e.key]) { e.preventDefault(); doJog(map[e.key].at(0), map[e.key].at(1)); } });
