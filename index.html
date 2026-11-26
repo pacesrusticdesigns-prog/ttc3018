@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1f242d">
 <link rel="manifest" href="manifest.json">
-<title>TTC3018 Studio v6</title>
+<title>TTC3018 Studio v6.1</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
   body{background:#14171c;color:#e6edf3;display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -14,7 +14,6 @@
   .status-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:#da3633;color:#fff}
   .badge.connected{background:#238636}
-  .badge.warn{background:#d29922;color:#000}
   button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px}
   button:hover{background:#30363d}
   button:disabled{opacity:.4;cursor:not-allowed}
@@ -49,7 +48,7 @@
 </head>
 <body>
 <header>
-  <h1>TTC3018 Studio v6</h1>
+  <h1>TTC3018 Studio v6.1</h1>
   <div class="status-bar">
     <select id="langSel" style="width:95px"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="pt">Português</option></select>
     <select id="unitSel" style="width:72px"><option value="mm" selected>mm</option><option value="in">inches</option></select>
@@ -102,6 +101,7 @@
     </div>
     <div class="row"><button data-cmd="G92 X0 Y0 Z0 A0" class="accent">Zero ALL</button><button id="btnGoZero">Go XY Zero</button><button id="btnProbeZ" class="warn">Probe Z</button></div>
     <div class="row"><label style="flex:0 0 42px">Step:</label><select id="jogStep"><option value="0.1">0.1</option><option value="1" selected>1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option></select><label style="flex:0 0 58px">Puck mm:</label><input type="number" id="probeThick" value="15.0" step="0.1" style="flex:0 0 58px"><button data-cmd="$X">Unlock</button></div>
+    <div class="row"><button id="btnKeyJog">Keyboard Jog: OFF</button><span style="font-size:10px;color:#8b949e;flex:2">Arrows = X/Y | PgUp/PgDn = Z</span></div>
     <div class="jog-grid">
       <button class="jog-btn" data-jog="A,-1">A-</button><button class="jog-btn" data-jog="Y,1">Y+</button><button class="jog-btn" data-jog="A,1">A+</button><button class="jog-btn" data-jog="Z,1">Z+</button>
       <button class="jog-btn" data-jog="X,-1">X-</button><button class="jog-btn" id="btnSafeZ">Safe Z</button><button class="jog-btn" data-jog="X,1">X+</button><button class="jog-btn" data-jog="Z,-1">Z-</button>
@@ -115,13 +115,13 @@
     <div class="bar-bg"><div class="bar-fill" id="progressFill"></div></div>
     <div id="progressText" style="font-size:11px;color:#8b949e;text-align:center">Idle — 0% | Est: --</div>
     <div class="row"><input type="text" id="manualCmd" placeholder="Manual G-code (e.g. G0 X10)"><button id="btnSendManual" style="flex:0 0 55px">Send</button></div>
-    <div class="console" id="consoleLog">Ready v6. Click Connect USB at top right.</div>
+    <div class="console" id="consoleLog">Ready v6.1. Click Connect USB at top right.</div>
   </div>
 </div>
 <div id="safetyModal" class="modal-bg"><div class="modal"><h3>Pre-Carve Safety Checklist</h3><div class="guide-card"><strong>1. Clamps &amp; Obstacles:</strong> Confirm all hold-down clamps are outside the carve boundary.<br><strong>2. Bit &amp; Zero Locked:</strong> Confirm the collet is tight and X/Y/Z zero is set on your workpiece.<br><strong>3. Eye/Ear Gear &amp; Supervision:</strong> Put on safety glasses and never leave a running spindle unattended.</div><div class="row"><button id="btnConfirmCarve" class="primary">Confirm &amp; Start Spindle</button><button id="btnCancelCarve">Cancel</button></div></div></div>
 <div id="guideModal" class="modal-bg"><div class="modal"><h3>Beginner's Guide: Bits, Carves &amp; Safety</h3><div class="guide-card"><strong>60° V-Bit (1/8"):</strong> Best all-around detail bit for crisp lettering, wildlife art, and shading (0.35–0.5mm depth).<br><strong>90° V-Bit (1/8"):</strong> Wider grooves for bold signs, thick borders, and edge chamfers.<br><strong>30° Engraving Bit:</strong> Needle tip for tiny text and delicate inlays (keep shallow 0.2–0.3mm).<br><strong>1/8" &amp; 1/16" Flat End Mills:</strong> Flat cutters for clearing pockets, flattening slabs, and cutting parts out.</div><div class="guide-card"><strong>Carve Types:</strong><br>• <strong>Recessed Raster (Default):</strong> Carves dark lines into wood for natural shadow, paint-fill, or torch-burn.<br>• <strong>Raised Relief (Invert):</strong> Carves the background away so your design stands raised.<br>• <strong>Paint / Epoxy Inlay:</strong> Seal wood first, carve lines, fill with black paint/resin, then sand flat.<br>• <strong>4th-Axis Rotary (A-Axis ON):</strong> Wraps Y travel around round tumblers, dowels, or rolling pins.</div><button id="btnCloseGuide" class="accent">Close Guide</button></div></div>
 <script>
-let port, writer, reader, isConnected = false, loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false, isDryRun = false, idx = 0, waitOk = false, timer, wakeLock = null, jobStartTime = 0, startIdx = 0, simTimer = null;
+let port, writer, reader, isConnected = false, loadedImage = null, gcodeLines = [], isRunning = false, isPaused = false, isDryRun = false, idx = 0, waitOk = false, timer, wakeLock = null, jobStartTime = 0, startIdx = 0, simTimer = null, keyJogOn = false;
 
 const PRESETS = {
   v60: { soft: [0.5, 600, 0.2, 10000], hard: [0.35, 400, 0.15, 10000], ply: [0.45, 500, 0.2, 10000], acrylic: [0.3, 450, 0.15, 9000] },
@@ -139,12 +139,7 @@ const I18N = {
   pt: { guide: "Guia Iniciante", connect: "Conectar USB", estop: "PARAR / RESET", p1: "1. Carregar e Ajustes", loadLbl: "Imagem (PNG/JPG) ou G-Code (.nc):", bitLbl: "Fresa", matLbl: "Material", wLbl: "Largura", hLbl: "Altura", dLbl: "Profundidade", szLbl: "Z Seguro", fLbl: "Avanço", soLbl: "Passo", origLbl: "Origem Zero", invLbl: "Modo Entalhe", genBtn: "Gerar Caminho G-Code", simBtn: "Simular na Tela", dlBtn: "Baixar .nc", p2: "2. Mover e Zerar", p3: "3. Executar e Monitor" }
 };
 
-function log(m) {
-  const c = document.getElementById('consoleLog');
-  c.textContent += '\n' + m;
-  c.scrollTop = c.scrollHeight;
-}
-
+function log(m) { const c = document.getElementById('consoleLog'); c.textContent += '\n' + m; c.scrollTop = c.scrollHeight; }
 function toMm(v) { return document.getElementById('unitSel').value === 'in' ? v * 25.4 : v; }
 function fromMm(v) { return document.getElementById('unitSel').value === 'in' ? +(v / 25.4).toFixed(4) : +v.toFixed(3); }
 
@@ -204,14 +199,14 @@ async function readLoop() {
         let l = raw.trim();
         if (!l) return;
         if (l.startsWith('<')) {
-          let part = l.split('WPos:')[1] || l.split('MPos:')[1];
+          let part = l.split('WPos:').at(1) || l.split('MPos:').at(1);
           if (part) {
-            let c = part.split('|')[0].split(',');
+            let c = part.split('|').at(0).split(',');
             if (c.length >= 3) {
-              document.getElementById('posX').textContent = fromMm(parseFloat(c[0])).toFixed(2);
-              document.getElementById('posY').textContent = fromMm(parseFloat(c[1])).toFixed(2);
-              document.getElementById('posZ').textContent = fromMm(parseFloat(c[2])).toFixed(2);
-              if (c[3] !== undefined) document.getElementById('posA').textContent = parseFloat(c[3]).toFixed(1);
+              document.getElementById('posX').textContent = fromMm(parseFloat(c.at(0))).toFixed(2);
+              document.getElementById('posY').textContent = fromMm(parseFloat(c.at(1))).toFixed(2);
+              document.getElementById('posZ').textContent = fromMm(parseFloat(c.at(2))).toFixed(2);
+              if (c.at(3) !== undefined) document.getElementById('posA').textContent = parseFloat(c.at(3)).toFixed(1);
             }
           }
         } else {
@@ -251,25 +246,20 @@ function drawPreviewFromGcode(lines) {
   let pts = [], cx = 0, cy = 0, cz = 5, minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
   lines.forEach(function(l) {
     const xm = l.match(/X([-0-9.]+)/), ym = l.match(/Y([-0-9.]+)/), zm = l.match(/Z([-0-9.]+)/);
-    if (xm) cx = parseFloat(xm[1]); if (ym) cy = parseFloat(ym[1]); if (zm) cz = parseFloat(zm[1]);
-    if (xm || ym) {
-      minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy);
-      pts.push({ x: cx, y: cy, cut: cz < 0 });
-    }
+    if (xm) cx = parseFloat(xm.at(1)); if (ym) cy = parseFloat(ym.at(1)); if (zm) cz = parseFloat(zm.at(1));
+    if (xm || ym) { minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy); pts.push({ x: cx, y: cy, cut: cz < 0 }); }
   });
   if (!pts.length) return;
   const sc = 440 / Math.max(1, maxX - minX, maxY - minY);
   ctx.lineWidth = 1.2;
   for (let i = 1; i < pts.length; i++) {
-    ctx.beginPath();
-    ctx.strokeStyle = pts[i].cut ? '#58a6ff' : 'rgba(210,153,34,0.22)';
-    ctx.moveTo(30 + (pts[i - 1].x - minX) * sc, 470 - (pts[i - 1].y - minY) * sc);
-    ctx.lineTo(30 + (pts[i].x - minX) * sc, 470 - (pts[i].y - minY) * sc);
-    ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle = pts.at(i).cut ? '#58a6ff' : 'rgba(210,153,34,0.22)';
+    ctx.moveTo(30 + (pts.at(i - 1).x - minX) * sc, 470 - (pts.at(i - 1).y - minY) * sc);
+    ctx.lineTo(30 + (pts.at(i).x - minX) * sc, 470 - (pts.at(i).y - minY) * sc); ctx.stroke();
   }
 }
 function handleFile(e) {
-  const f = e.target.files[0];
+  const f = e.target.files.item(0);
   if (!f) return;
   const n = f.name.toLowerCase();
   if (n.endsWith('.nc') || n.endsWith('.gcode') || n.endsWith('.gc') || n.endsWith('.txt')) {
@@ -335,7 +325,7 @@ function generateGcodeFromImage() {
       let blk = false;
       if (i < cols) {
         const k = (iR * cols + c) * 4;
-        const lum = 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2];
+        const lum = 0.299 * d.at(k) + 0.587 * d.at(k + 1) + 0.114 * d.at(k + 2);
         blk = inv ? lum >= T : lum < T;
         if (blk) ctx.fillRect(c * pxW, iR * pxH, Math.ceil(pxW), Math.ceil(pxH));
       }
@@ -365,7 +355,7 @@ async function nextLine() {
     if (wakeLock) { wakeLock.release().catch(function() {}); wakeLock = null; }
     return log('--- JOB COMPLETE ---');
   }
-  let l = gcodeLines[idx++];
+  let l = gcodeLines.at(idx++);
   localStorage.setItem('ttc_last_line', idx);
   document.getElementById('btnLastLine').textContent = 'Last Stopped (' + idx + ')';
   const szSafe = (Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))) + 10).toFixed(2);
@@ -373,7 +363,7 @@ async function nextLine() {
     if (l.startsWith('M3')) l = 'M5';
     l = l.replace(/Z[-0-9.]+/g, 'Z' + szSafe);
   }
-  updateLoadMeter(!isDryRun && /Z-/.test(l) || (!isDryRun && l.startsWith('G1') && !l.includes('Z')));
+  updateLoadMeter((!isDryRun && /Z-/.test(l)) || (!isDryRun && l.startsWith('G1') && !l.includes('Z')));
   waitOk = true;
   const done = idx - startIdx, tot = Math.max(1, gcodeLines.length - startIdx);
   const p = Math.min(100, Math.round((done / tot) * 100));
@@ -423,14 +413,17 @@ document.getElementById('btnSafeZ').addEventListener('click', function() { sendC
 document.getElementById('btnSpindleOn').addEventListener('click', function() { sendCmd('M3 S' + (parseInt(document.getElementById('spindleSpeed').value, 10) || 10000)); });
 document.getElementById('btnProbeZ').addEventListener('click', function() { const t = parseFloat(document.getElementById('probeThick').value) || 15; sendCmd('G91 G38.2 Z-25 F80'); setTimeout(function() { sendCmd('G92 Z' + t.toFixed(2)); sendCmd('G90 G0 Z' + (t + 5).toFixed(2)); }, 3000); });
 document.getElementById('btnTrace').addEventListener('click', function() { const W = toMm(parseFloat(document.getElementById('carveWidth').value)), H = toMm(parseFloat(document.getElementById('carveHeight').value)), orig = document.getElementById('originMode').value, sz = (Math.abs(toMm(parseFloat(document.getElementById('safeZ').value))) + 5).toFixed(2); const x0 = orig === 'center' ? -W / 2 : orig.endsWith('r') ? -W : 0, y0 = orig === 'center' ? -H / 2 : orig.startsWith('b') ? -H : 0; ['G90', 'G0 Z' + sz, 'G0 X' + x0.toFixed(2) + ' Y' + y0.toFixed(2), 'G1 X' + (x0 + W).toFixed(2) + ' F1200', 'G1 Y' + (y0 + H).toFixed(2), 'G1 X' + x0.toFixed(2), 'G1 Y' + y0.toFixed(2), 'G0 X0 Y0'].forEach(function(c, i) { setTimeout(function() { sendCmd(c); }, i * 450); }); });
-document.getElementById('btnSim').addEventListener('click', function() { if (simTimer) { clearInterval(simTimer); simTimer = null; return log('Simulation stopped.'); } drawPreviewFromGcode(gcodeLines); const cv = document.getElementById('previewCanvas'), ctx = cv.getContext('2d'); let pts = [], cx = 0, cy = 0, minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9; gcodeLines.forEach(function(l) { const xm = l.match(/X([-0-9.]+)/), ym = l.match(/Y([-0-9.]+)/); if (xm) cx = parseFloat(xm); if (ym) cy = parseFloat(ym); if (xm || ym) { minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy); pts.push({ x: cx, y: cy }); } }); if (pts.length < 2) return; const sc = 440 / Math.max(1, maxX - minX, maxY - minY); let si = 1; simTimer = setInterval(function() { for (let k = 0; k < 25 && si < pts.length; k++, si++) { ctx.beginPath(); ctx.strokeStyle = '#3fb950'; ctx.lineWidth = 1.6; ctx.moveTo(30 + (pts[si - 1].x - minX) * sc, 470 - (pts[si - 1].y - minY) * sc); ctx.lineTo(30 + (pts[si].x - minX) * sc, 470 - (pts[si].y - minY) * sc); ctx.stroke(); } if (si >= pts.length) { clearInterval(simTimer); simTimer = null; log('Simulation complete!'); } }, 30); });
-function applyPresets() { const p = PRESETS[document.getElementById('bitPreset').value][document.getElementById('matPreset').value]; document.getElementById('cutDepth').value = fromMm(p); document.getElementById('feedRate').value = fromMm(p); document.getElementById('stepOver').value = fromMm(p); document.getElementById('spindleSpeed').value = p; updateLoadMeter(false); }
+document.getElementById('btnSim').addEventListener('click', function() { if (simTimer) { clearInterval(simTimer); simTimer = null; return log('Simulation stopped.'); } drawPreviewFromGcode(gcodeLines); const cv = document.getElementById('previewCanvas'), ctx = cv.getContext('2d'); let pts = [], cx = 0, cy = 0, minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9; gcodeLines.forEach(function(l) { const xm = l.match(/X([-0-9.]+)/), ym = l.match(/Y([-0-9.]+)/); if (xm) cx = parseFloat(xm.at(1)); if (ym) cy = parseFloat(ym.at(1)); if (xm || ym) { minX = Math.min(minX, cx); maxX = Math.max(maxX, cx); minY = Math.min(minY, cy); maxY = Math.max(maxY, cy); pts.push({ x: cx, y: cy }); } }); if (pts.length < 2) return; const sc = 440 / Math.max(1, maxX - minX, maxY - minY); let si = 1; simTimer = setInterval(function() { for (let k = 0; k < 25 && si < pts.length; k++, si++) { ctx.beginPath(); ctx.strokeStyle = '#3fb950'; ctx.lineWidth = 1.6; ctx.moveTo(30 + (pts.at(si - 1).x - minX) * sc, 470 - (pts.at(si - 1).y - minY) * sc); ctx.lineTo(30 + (pts.at(si).x - minX) * sc, 470 - (pts.at(si).y - minY) * sc); ctx.stroke(); } if (si >= pts.length) { clearInterval(simTimer); simTimer = null; log('Simulation complete!'); } }, 30); });
+function applyPresets() { const p = PRESETS[document.getElementById('bitPreset').value][document.getElementById('matPreset').value]; document.getElementById('cutDepth').value = fromMm(p.at(0)); document.getElementById('feedRate').value = fromMm(p.at(1)); document.getElementById('stepOver').value = fromMm(p.at(2)); document.getElementById('spindleSpeed').value = p.at(3); updateLoadMeter(false); }
 document.getElementById('bitPreset').addEventListener('change', applyPresets);
 document.getElementById('matPreset').addEventListener('change', applyPresets);
 document.getElementById('unitSel').addEventListener('change', function() { const toIn = this.value === 'in'; ['carveWidth', 'carveHeight', 'cutDepth', 'safeZ', 'feedRate', 'stepOver', 'cylDia'].forEach(function(id) { const el = document.getElementById(id), v = parseFloat(el.value); if (!isNaN(v)) el.value = toIn ? +(v / 25.4).toFixed(4) : +(v * 25.4).toFixed(2); }); });
 document.getElementById('langSel').addEventListener('change', function() { const dict = I18N[this.value] || I18N.en; localStorage.setItem('ttc_lang', this.value); document.querySelectorAll('[data-t]').forEach(function(el) { if (dict[el.dataset.t]) el.textContent = dict[el.dataset.t]; }); });
 document.querySelectorAll('[data-cmd]').forEach(function(b) { b.addEventListener('click', function() { sendCmd(b.dataset.cmd); }); });
-document.querySelectorAll('[data-jog]').forEach(function(b) { b.addEventListener('click', function() { const p = b.dataset.jog.split(','), step = parseFloat(document.getElementById('jogStep').value) * parseFloat(p), unit = document.getElementById('unitSel').value === 'in' ? 'G20' : 'G21'; sendCmd('$J=G91 ' + unit + ' ' + p + step + ' F1000'); }); });
+function doJog(axis, dir) { const step = parseFloat(document.getElementById('jogStep').value) * dir, unit = document.getElementById('unitSel').value === 'in' ? 'G20' : 'G21'; sendCmd('$J=G91 ' + unit + ' ' + axis + step + ' F1000'); }
+document.querySelectorAll('[data-jog]').forEach(function(b) { b.addEventListener('click', function() { const p = b.dataset.jog.split(','); doJog(p.at(0), parseFloat(p.at(1))); }); });
+document.getElementById('btnKeyJog').addEventListener('click', function() { keyJogOn = !keyJogOn; this.textContent = keyJogOn ? 'Keyboard Jog: ON' : 'Keyboard Jog: OFF'; this.classList.toggle('primary', keyJogOn); });
+document.addEventListener('keydown', function(e) { if (!keyJogOn || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return; const map = { ArrowLeft: ['X', -1], ArrowRight: ['X', 1], ArrowUp: ['Y', 1], ArrowDown: ['Y', -1], PageUp: ['Z', 1], PageDown: ['Z', -1] }; if (map[e.key]) { e.preventDefault(); doJog(map[e.key].at(0), map[e.key].at(1)); } });
 const savedLast = localStorage.getItem('ttc_last_line'); if (savedLast) document.getElementById('btnLastLine').textContent = 'Last Stopped (' + savedLast + ')';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function() {});
 </script>
